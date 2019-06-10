@@ -11,8 +11,6 @@ lib/
 *.log
 
 
-
-brilliantPet/brilliantPet/baseSettings.py
 brilliantPet/.idea/*
 .idea/
 .idea
