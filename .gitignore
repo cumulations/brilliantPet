@@ -10,5 +10,5 @@ lib/
 *.sqlite
 *.log
 
-asdfbrilliantPet/brilliantPet/baseSettings.py
-brilliantPet/.idea/
+brilliantPet/brilliantPet/baseSettings.py
+.idea/

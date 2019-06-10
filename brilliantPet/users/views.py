@@ -203,7 +203,7 @@ class usersView(APIView):
                     "address" : cleanedData["address"],
                     "rolls_count_at_home" : cleanedData["rolls_count_at_home"]
                 }
-                return gm.successResponse("User added successfully.")
+                return gm.successResponse(details)
 
             except:
                 gm.log(traceback.format_exc())
