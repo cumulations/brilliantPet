@@ -258,10 +258,11 @@ class imageUpload(APIView):
         s3 = boto3.resource("s3", aws_access_key_id = aws_access_key_id, aws_secret_access_key = aws_secret_access_key, region_name = region_name)
         bucket = s3.Bucket("brilliantPet.images")
         try:
+            mimetype = "image/jpeg"
             folder = s3.Bucket("brilliantpet.images")
             ct = float(time.time()) * 1000
             fileName = "{}_{}.{}".format(user, ct, imgtype)
-            i = folder.put_object(Key=fileName, Body=image, ACL='public-read')
+            i = folder.put_object(Key=fileName, Body=image, ACL='public-read', ContentType = mimetype)
             download_url = self.generate_url(fileName)
             gm.log("b64body received : " + str(b64body) + "\nUrl generated : " + download_url)
 
