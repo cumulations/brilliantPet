@@ -10,7 +10,7 @@ lib/
 *.sqlite
 *.log
 
-
+baseSettings.py
 brilliantPet/.idea/*
 .idea/
 .idea
