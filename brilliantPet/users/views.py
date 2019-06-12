@@ -1,7 +1,7 @@
 from django.shortcuts import render
 import json
 import traceback
-from .models import MachineDetails, User
+from .models import MachineDetails, User, Pets
 from rest_framework.views import APIView
 from django.db import IntegrityError
 from brilliantPet import generalMethods
@@ -158,9 +158,7 @@ class usersView(APIView):
             except:
                 return gm.clientError("rolls_count_at_home should be int.")
 
-        cleanedData = {}
-        for param in requiredParams:
-            cleanedData[param] = str(data[param]).strip()
+        cleanedData = gm.cleanData(data)
 
         try:
             user = User.objects.get(pk = cleanedData["userid"])
@@ -274,6 +272,81 @@ class imageUpload(APIView):
             return gm.clientError("Error while uploading file.")
 
 
+
+class pets(APIView):
+
+    def get(self, request):
+        pets = []
+        params = request.query_params
+        if "userid" not in params:
+            return gm.clientError("Required param 'userid' missing.")
+
+        try:
+            user = User.objects.get(pk=params["userid"])
+        except:
+            return gm.clientError("User does not exist.")
+        else:
+            userPets = Pets.objects.filter(userid=params["userid"], is_deleted = 0)
+            for m in userPets:
+                pet = {
+                    "petid": m.petid,
+                    "name": m.name,
+                    "breed": m.breed,
+                    "weight": m.weight,
+                    "weight_unit" : m.weight_unit,
+                    "image_url" : m.image_url,
+                    "birthday" : m.birthday
+                }
+                pets.append(pet)
+
+            return gm.successResponse(pets)
+
+
+    def post(self, request):
+        requiredParams = ["userid", "name", "breed", "birthday", "image_url", "weight", "weight_unit"]
+        data = request.data
+
+        missingParams = gm.missingParams(requiredParams, data)
+        if missingParams:
+            missingParams = ", ".join(missingParams)
+            return gm.clientError(missingParamMessage.format(missingParams))
+
+        requiredParams.pop(4)
+
+        emptyParams = gm.emptyParams(requiredParams, data)
+        if emptyParams:
+            emptyParams = ", ".join(emptyParams)
+            return gm.clientError((emptyParamMessage.format(emptyParams)))
+
+        try:
+            user = User.objects.get(pk = data['userid'])
+        except:
+            return gm.clientError("User doesn't exist.")
+
+
+        data = gm.cleanData(data)
+        try:
+            pet = user.pets_set.create(name = data["name"],\
+                       breed = data["breed"], birthday = data["birthday"],\
+                       weight = data["weight"],\
+                       weight_unit = data["weight_unit"])
+
+            if data["image_url"] not in ["", None]:
+                pet["image_url"] = data["image_url"]
+            pet.save()
+
+        except Exception as e:
+            traceback.print_exc()
+            print("hello")
+            return gm.errorResponse("Error while saving device details.")
+
+        else:
+            data["petid"] = pet.petid
+            data["image_url"] = pet.image_url
+            return gm.successResponse(data)
+
+
+    
 
 
 
