@@ -1,6 +1,9 @@
 from django.http import JsonResponse
 import time
 import traceback
+import hashlib
+import random
+import string
 
 
 
@@ -72,6 +75,39 @@ class generalClass:
             return True
         except:
             traceback.print_exc()
+
+    def cleanData(self, data):
+
+        cleanedData = {}
+        for param in data:
+            if type(data[param]) == str:
+                cleanedData[param] = data[param].strip()
+
+        return cleanedData
+
+
+    def hash_sha3_512(self, string):
+
+        if type(string) != bytes:
+            string = str(string).encode("utf-8")
+
+        sha3 = hashlib.sha3_512()
+        sha3.update(string)
+        return sha3.hexdigest()
+
+
+    def randomStringGenerator(self, ssize = 256):
+
+        punctuation = "!@#$%^&*()?"
+        r = ''.join([random.choice(string.ascii_letters + string.digits + punctuation) for n in range(ssize)])
+        return r
+
+
+
+
+
+
+
 
 
 
