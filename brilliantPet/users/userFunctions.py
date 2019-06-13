@@ -6,20 +6,21 @@ import traceback
 
 gm = generalClass()
 
-
-def isLoggedIn(data, user):
-    cleanedData = gm.cleanData(data)
-
-    requiredParams = ["userid", "login_token"]
-    missingParams = gm.missingParams(requiredParams, cleanedData)
-    if missingParams:
-        raise KeyError("({}) missing.".format(", ".join(missingParams)))
-
+def getUser(data):
+    data = gm.cleanData(data)
     try:
-        pass
+        if "email" in data:
+            user = User.objects.filter(email=data["email"], isDeleted=0)
+            return user[0]
+        if "userid" in data:
+            user = User.objects.filter(userid=data["userid"], isDeleted=0)
+            return user[0]
+        else:
+            return None
     except:
-        pass
-
+        traceback.print_exc()
+        gm.log(traceback.format_exc())
+        return None
 
 def isUser(data):
 
@@ -31,7 +32,6 @@ def isUser(data):
         if "userid" in data:
             user = User.objects.filter(userid = data["userid"], isDeleted = 0)
             return user[0]
-
         else:
             return None
 
@@ -102,15 +102,22 @@ def login(data, user):
 
 
 
-def authenticate(data, user):
+def authenticate(data):
 
-    cleanedData = gm.cleanData(data)
+    data = gm.cleanData(data)
 
-    if user.login_token == cleanedData["login_token"]:
-        return True
+    missingLoginDetails = gm.login_details_absent(data)
+    if missingLoginDetails:
+        return missingLoginDetails
 
-    return False
+    user = isUser(data)
+    if not user:
+        return gm.not_a_user()
 
+    if user.login_token == data["login_token"]:
+        return False
+
+    return gm.invalidToken()
 
 
 def logout(data, user):
@@ -122,6 +129,8 @@ def logout(data, user):
 
     else:
         return False
+
+
 
 
 

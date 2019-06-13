@@ -4,7 +4,14 @@ import traceback
 import hashlib
 import random
 import string
+from brilliantPet import settings
+import boto3
 
+
+
+aws_access_key_id = settings.aws_access_key_id
+aws_secret_access_key = settings.aws_secret_access_key
+region_name = settings.region_name
 
 
 class generalClass:
@@ -103,12 +110,45 @@ class generalClass:
         return r
 
 
+
     def invalidToken(self):
 
         return self.clientError("Invalid login_token.")
 
+
+
     def not_a_user(self):
+
         return self.clientError("User not registered. Please register first.")
+
+
+
+    def userid_or_password_missing(self):
+
+        return self.clientError("Required params 'userid' and 'email' missing.")
+
+    def getS3resource(self):
+
+        s3 = boto3.resource("s3", aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key,
+                       region_name=region_name)
+        return s3
+
+
+    def login_details_absent(self, params):
+
+        requiredParams = ["userid", "email"]
+        missingParams = self.missingParams(requiredParams, params)
+        if missingParams and len(missingParams) > 1:
+            return self.userid_or_password_missing()
+
+        requiredParams = ["login_token"]
+        missingParams = self.missingParams(requiredParams, params)
+        if missingParams:
+            return self.clientError("Required param 'login_token' missing.")
+
+        return None
+
+
 
 
 
