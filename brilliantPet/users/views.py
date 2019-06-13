@@ -2,6 +2,7 @@ from django.shortcuts import render
 import json
 import traceback
 from .models import MachineDetails, User, Pets
+from django.core.exceptions import *
 from rest_framework.views import APIView
 from django.db import IntegrityError
 from brilliantPet import generalMethods
@@ -9,6 +10,7 @@ from brilliantPet import settings
 import boto3
 import base64
 import time
+from .userFunctions import *
 
 
 aws_access_key_id = settings.aws_access_key_id
@@ -19,6 +21,8 @@ region_name = settings.region_name
 gm = generalMethods.generalClass()
 missingParamMessage = "({}) missing in post data."
 emptyParamMessage = "({}) empty in post data."
+loginBasic = ["userid", "password", "email"]
+authenticationBasic = ["userid", "email", "login_token"]
 
 
 
@@ -69,7 +73,7 @@ class userDevices(APIView):
         emptyParams = gm.emptyParams(requiredParams, data)
         if emptyParams:
             emptyParams = ", ".join(emptyParams)
-            return gm.clientError((emptyParamMessage.format(emptyParams)))
+            return gm.clientError(emptyParamMessage.format(emptyParams))
 
         try:
             user = User.objects.get(pk = data['userid'])
@@ -140,17 +144,19 @@ class usersView(APIView):
 
     def post(self, request):
         data = request.data
-        requiredParams = ["userid", "email", "address", "name"]
+        requiredParams = ["userid", "name", "notification_token", "rolls_count_at_home", "password", "email", "address", "profile_image"]
 
         missingParams = gm.missingParams(requiredParams, data)
         if missingParams:
             missingParams = ", ".join(missingParams)
             return gm.clientError(missingParamMessage.format(missingParams))
 
+        requiredParams = requiredParams[:-1]
+
         emptyParams = gm.emptyParams(requiredParams, data)
         if emptyParams:
             emptyParams = ", ".join(emptyParams)
-            return gm.clientError((emptyParamMessage.format(emptyParams)))
+            return gm.clientError(emptyParamMessage.format(emptyParams))
 
         if "rolls_count_at_home" in data:
             try:
@@ -160,54 +166,29 @@ class usersView(APIView):
 
         cleanedData = gm.cleanData(data)
 
-        try:
-            user = User.objects.get(pk = cleanedData["userid"])
+        if isUser(data):
             return gm.clientError("User already exists.")
 
-        except:
-
-            em = User.objects.filter(email = cleanedData["email"])
-            if len(em) > 0:
-                return gm.clientError("Email address already exists.")
-
-            defaultParams = {
-                "rolls_count_at_home" : 0,
-                "notification_token" : None,
-                "profile_image": None
-            }
-
-            for param in defaultParams:
-                if param in data:
-                    cleanedData[param] = data[param]
-                else:
-                    cleanedData[param] = defaultParams[param]
-
-
-            user = User()
-            user.userid = cleanedData["userid"]
-            user.email = cleanedData["email"]
-            user.name = cleanedData["name"]
-            user.address = cleanedData["address"]
-            user.rolls_count_at_home = cleanedData["rolls_count_at_home"]
-            user.notification_token = cleanedData["notification_token"]
-            user.profile_image = cleanedData["profile_image"]
-
+        else:
             try:
-                user.save()
+                user = register(data)
                 details = {
-                    "userid" : cleanedData["userid"],
-                    "email" : cleanedData["email"],
-                    "name" : cleanedData["name"],
-                    "address" : cleanedData["address"],
-                    "rolls_count_at_home" : cleanedData["rolls_count_at_home"]
+                    "userid" : user.userid,
+                    "name" : user.name,
+                    "notification_token" : user.notification_token,
+                    "rolls_count_at_home" : user.rolls_count_at_home,
+                    "email" : user.email,
+                    "address" : user.address,
+                    "profile_image" : user.profile_image
                 }
                 return gm.successResponse(details)
+
+            except ValidationError as e:
+                return gm.errorResponse(str(e))
 
             except:
                 gm.log(traceback.format_exc())
                 return gm.errorResponse("Error while adding user.")
-
-#something
 
 
 
@@ -237,7 +218,7 @@ class imageUpload(APIView):
         emptyParams = gm.emptyParams(requiredParams, data)
         if emptyParams:
             emptyParams = ", ".join(emptyParams)
-            return gm.clientError((emptyParamMessage.format(emptyParams)))
+            return gm.clientError(emptyParamMessage.format(emptyParams))
 
         user = data["userid"][0]
         b64body = data["b64body"][0]
@@ -270,6 +251,71 @@ class imageUpload(APIView):
         except:
             traceback.print_exc()
             return gm.clientError("Error while uploading file.")
+
+
+
+class userLogin(APIView):
+
+    def get(self, request):
+        return gm.clientError("GET Method is not supported.")
+
+    def post(self, request):
+
+        requiredParams = loginBasic
+        data = request.data
+
+        missingParams = gm.missingParams(requiredParams, data)
+        if missingParams:
+            missingParams = ", ".join(missingParams)
+            return gm.clientError(missingParamMessage.format(missingParams))
+
+        user = isUser(data)
+        if not user:
+            return gm.clientError("User not registered. Please register first.")
+
+        token = login(data, user)
+
+        if token:
+            loginToken = {
+                "login_token" : token
+            }
+            return gm.successResponse(loginToken)
+
+        else:
+            return gm.clientError("Invalid userid/email or password.")
+
+
+class userLogout(APIView):
+
+    def get(self, request):
+        return gm.clientError("GET Method is not supported.")
+
+    def post(self, request):
+
+        requiredParams = authenticationBasic
+        data = request.data
+
+        missingParams = gm.missingParams(requiredParams, data)
+        if missingParams:
+            missingParams = ", ".join(missingParams)
+            return gm.clientError(missingParamMessage.format(missingParams))
+
+        user = isUser(data)
+        if not user:
+            return gm.clientError("User not registered. Please register first.")
+
+        authenticated  = authenticate(data, user)
+
+        if authenticated:
+            if logout(data, user):
+                return gm.successResponse("Successfully logged out.")
+
+            else:
+                return gm.errorResponse("Couldn't log out user.")
+
+        else:
+            return gm.invalidToken()
+
 
 
 
@@ -344,6 +390,11 @@ class pets(APIView):
             data["petid"] = pet.petid
             data["image_url"] = pet.image_url
             return gm.successResponse(data)
+
+
+
+
+
 
 
 

@@ -103,6 +103,10 @@ class generalClass:
         return r
 
 
+    def invalidToken(self):
+
+        return self.clientError("Invalid login_token.")
+
 
 
 
