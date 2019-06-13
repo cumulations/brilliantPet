@@ -25,13 +25,11 @@ def isUser(data):
 
     data = gm.cleanData(data)
     try:
-
-        user = User.objects.filter(email = data["email"], isDeleted = 0)
-        if len(user) > 0:
+        if "email" in data:
+            user = User.objects.filter(email = data["email"], isDeleted = 0)
             return user[0]
-
-        user = User.objects.filter(userid = data["userid"], isDeleted = 0)
-        if len(user) > 0:
+        if "userid" in data:
+            user = User.objects.filter(userid = data["userid"], isDeleted = 0)
             return user[0]
 
         else:

@@ -98,7 +98,7 @@ class generalClass:
 
     def randomStringGenerator(self, ssize = 256):
 
-        punctuation = "!@#$%^&*()?"
+        punctuation = "!^*()"
         r = ''.join([random.choice(string.ascii_letters + string.digits + punctuation) for n in range(ssize)])
         return r
 

@@ -45,18 +45,26 @@ class userDevices(APIView):
 
         requiredParams = ["userid", "email"]
         missingParams = gm.missingParams(requiredParams, params)
-        if len(missingParams) > 1:
+        if missingParams and len(missingParams) > 1:
             return gm.clientError("Required params '{}' or '{}' missing.".format(*missingParams))
 
-        missingParams = gm.missingParams("login_token")
+        missingParams = gm.missingParams(["login_token"], params)
         if missingParams:
             return gm.clientError(missingParamMessage.format(*missingParams))
 
         user = isUser(params)
+
         if not user:
             gm.not_a_user()
 
+
         authenticated = authenticate(params, user)
+        print("*"*100)
+        print(params["login_token"])
+        print("*" * 100)
+        print(user.login_token)
+        print("*" * 100)
+        print(authenticated)
 
         if not authenticated:
             return gm.invalidToken()
