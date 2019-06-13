@@ -3,7 +3,7 @@
 NAME="brilliantPet"                                 # Name of the application
 DJANGODIR=/home/ubuntu/brilliantPet/brilliantPet/brilliantPet          # Django project directory
 SOCKFILE=0.0.0.0:8000    # we will communicte using this unix socket
-USER=ubuntu                                       # the user to run as
+USER=root                                       # the user to run as
 GROUP=sudo                                    # the group to run as
 NUM_WORKERS=3                                 # how many worker processes should Gunicorn spawn
 DJANGO_SETTINGS_MODULE=brilliantPet.settings            # which settings file should Django use

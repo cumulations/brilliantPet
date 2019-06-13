@@ -7,9 +7,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'brilliantPet',
         'USER': 'root',
-        'PASSWORD' : 'password',
-        'HOST': 'localhost',
+        # 'PASSWORD': 'root1234',
+        'PASSWORD' : "password",
+        'HOST': '0.0.0.0',
         'PORT': '3306',
     }
 }
-
