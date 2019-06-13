@@ -20,6 +20,7 @@ from django.conf.urls import url
 
 urlpatterns = [
     url(r"^user/", include('users.urls')),
+    url(r"^training/", include('training.urls'))
 ]
 
 
