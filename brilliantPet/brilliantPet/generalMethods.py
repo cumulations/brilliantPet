@@ -103,7 +103,7 @@ class generalClass:
         return sha3.hexdigest()
 
 
-    def randomStringGenerator(self, ssize = 256):
+    def randomStringGenerator(self, ssize = 4):
 
         punctuation = "!^*()"
         r = ''.join([random.choice(string.ascii_letters + string.digits + punctuation) for n in range(ssize)])

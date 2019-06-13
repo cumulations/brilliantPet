@@ -14,3 +14,4 @@ brilliantPet/brilliantPet/baseSettings.py
 brilliantPet/.idea/*
 .idea/
 .idea
+*.pyc

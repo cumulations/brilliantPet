@@ -110,7 +110,7 @@ class userDevices(APIView):
 
 
         try:
-
+            user = getUser(data)
             user.machinedetails_set.create(machine_id = machineid, name = name, status = status, \
                                      mode = mode, firmware = firmware, network = network, isremoved = isRemoved,\
                                      user_role = user_role)
@@ -211,10 +211,6 @@ class imageUpload(APIView):
 
         data = request.data
 
-        hasError = authenticate(data)
-        if hasError:
-            return hasError
-
         requiredParams = ["imgtype", "b64body"]
         missingParams = gm.missingParams(requiredParams, data)
         if missingParams:
@@ -226,8 +222,7 @@ class imageUpload(APIView):
             emptyParams = ", ".join(emptyParams)
             return gm.clientError(emptyParamMessage.format(emptyParams))
 
-
-        user = data["userid"][0]
+        randomString = gm.randomStringGenerator(5)
         imgtype = data["imgtype"]
 
         b64body = data['b64body']
@@ -238,7 +233,7 @@ class imageUpload(APIView):
             mimetype = "image/jpeg"
             folder = s3.Bucket("brilliantpet.images")
             ct = float(time.time()) * 1000
-            fileName = "{}_{}.{}".format(user, ct, imgtype)
+            fileName = "{}_{}.{}".format(randomString, ct, imgtype)
             i = folder.put_object(Key=fileName, Body=image, ACL='public-read', ContentType = mimetype)
             download_url = self.generate_url(fileName)
             gm.log("b64body received : " + str(b64body) + "\nUrl generated : " + download_url)
@@ -263,6 +258,9 @@ class userLogin(APIView):
         missingLoginDetails = gm.login_details_absent(data)
         if not missingLoginDetails:
             return missingLoginDetails
+
+        if "password" not in data:
+            return gm.clientError("Required param 'password' missing.")
 
         user = isUser(data)
 
@@ -374,6 +372,13 @@ class pets(APIView):
             data["petid"] = pet.petid
             data["image_url"] = pet.image_url
             return gm.successResponse(data)
+
+
+
+
+
+
+
 
 
 
