@@ -107,6 +107,9 @@ class generalClass:
 
         return self.clientError("Invalid login_token.")
 
+    def not_a_user(self):
+        return self.clientError("User not registered. Please register first.")
+
 
 
 

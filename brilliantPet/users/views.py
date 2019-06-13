@@ -23,6 +23,8 @@ missingParamMessage = "({}) missing in post data."
 emptyParamMessage = "({}) empty in post data."
 loginBasic = ["userid", "password", "email"]
 authenticationBasic = ["userid", "email", "login_token"]
+notUserMessage = "User not registered. Please register first."
+getNotSupported = "GET Method not supported."
 
 
 
@@ -40,13 +42,25 @@ class userDevices(APIView):
 
         machines = []
         params = request.query_params
-        if "userid" not in params:
-            return gm.clientError("Required param 'userid' missing.")
 
-        try:
-            user = User.objects.get(pk = params["userid"])
-        except:
-            return gm.clientError("User does not exist.")
+        requiredParams = ["userid", "email"]
+        missingParams = gm.missingParams(requiredParams, params)
+        if len(missingParams) > 1:
+            return gm.clientError("Required params '{}' or '{}' missing.".format(*missingParams))
+
+        missingParams = gm.missingParams("login_token")
+        if missingParams:
+            return gm.clientError(missingParamMessage.format(*missingParams))
+
+        user = isUser(params)
+        if not user:
+            gm.not_a_user()
+
+        authenticated = authenticate(params, user)
+
+        if not authenticated:
+            return gm.invalidToken()
+
         else:
             userMachines = MachineDetails.objects.filter(userid = params["userid"], isremoved = 0)
             for m in userMachines:
@@ -62,7 +76,7 @@ class userDevices(APIView):
 
 
     def post(self, request):
-        requiredParams = ["machine_id", "userid", "name", "status"]
+        requiredParams = ["machine_id", "userid", "name", "status", "mode", "firmware", "network", "user_role", "login_token"]
         data = request.data
 
         missingParams = gm.missingParams(requiredParams, data)
@@ -75,10 +89,14 @@ class userDevices(APIView):
             emptyParams = ", ".join(emptyParams)
             return gm.clientError(emptyParamMessage.format(emptyParams))
 
-        try:
-            user = User.objects.get(pk = data['userid'])
-        except:
-            return gm.clientError("User doesn't exist.")
+        user = isUser(data)
+        if not user:
+            return gm.not_a_user()
+
+        authenticated = authenticate(data, user)
+
+        if not authenticated:
+            return gm.invalidToken()
 
         try:
             MachineDetails.objects.get(pk = data["machine_id"])
@@ -90,11 +108,11 @@ class userDevices(APIView):
             status = int(data["status"].strip())
 
         defaultParams = {
-            "mode" : "",
+            "mode" : "manual",
             "firmware" : "",
             "network" : "",
             "isremoved" : 0,
-            "user_role" : ""
+            "user_role" : "owner"
         }
 
         for default in defaultParams.keys():
@@ -302,7 +320,7 @@ class userLogout(APIView):
 
         user = isUser(data)
         if not user:
-            return gm.clientError("User not registered. Please register first.")
+            return gm.clientError(notUserMessage)
 
         authenticated  = authenticate(data, user)
 
