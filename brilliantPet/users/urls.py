@@ -8,7 +8,9 @@ urlpatterns = [
     url(r"^devices$", userDevices.as_view()),
     url(r"^imageupload$", imageUpload.as_view()),
     url(r"^users$", usersView.as_view()),
-    url(r"^pets$", pets.as_view())
+    url(r"^pets$", pets.as_view()),
+    url(r"^login$", userLogin.as_view()),
+    url(r"^logout$", userLogout.as_view())
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
