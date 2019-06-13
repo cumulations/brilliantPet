@@ -53,9 +53,11 @@ class userDevices(APIView):
             return gm.clientError(missingParamMessage.format(*missingParams))
 
         user = isUser(params)
+        print("*" * 100)
+        print(user)
 
         if not user:
-            gm.not_a_user()
+            return gm.not_a_user()
 
 
         authenticated = authenticate(params, user)
