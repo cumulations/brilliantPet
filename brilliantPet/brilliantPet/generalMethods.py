@@ -97,6 +97,9 @@ class generalClass:
             if type(data[param]) == str:
                 cleanedData[param] = data[param].strip()
 
+            if param == "email":
+                cleanedData[param] = data[param].lower()
+
         return cleanedData
 
 
