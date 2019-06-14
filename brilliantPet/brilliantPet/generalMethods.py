@@ -13,6 +13,13 @@ aws_access_key_id = settings.aws_access_key_id
 aws_secret_access_key = settings.aws_secret_access_key
 region_name = settings.region_name
 
+missingParamMessage = "({}) missing in post data."
+emptyParamMessage = "({}) empty in post data."
+loginBasic = ["userid", "password", "email"]
+authenticationBasic = ["userid", "email", "login_token"]
+notUserMessage = "User not registered. Please register first."
+getNotSupported = "GET Method not supported."
+
 
 class generalClass:
 

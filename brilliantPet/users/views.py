@@ -5,28 +5,14 @@ from .models import MachineDetails, User, Pets
 from django.core.exceptions import *
 from rest_framework.views import APIView
 from django.db import IntegrityError
-from brilliantPet import generalMethods
+from brilliantPet.generalMethods import *
 from brilliantPet import settings
 import boto3
 import base64
 import time
 from .userFunctions import *
 
-
-aws_access_key_id = settings.aws_access_key_id
-aws_secret_access_key = settings.aws_secret_access_key
-region_name = settings.region_name
-
-
-gm = generalMethods.generalClass()
-missingParamMessage = "({}) missing in post data."
-emptyParamMessage = "({}) empty in post data."
-loginBasic = ["userid", "password", "email"]
-authenticationBasic = ["userid", "email", "login_token"]
-notUserMessage = "User not registered. Please register first."
-getNotSupported = "GET Method not supported."
-
-
+gm = generalClass()
 
 class notFound(APIView):
 
