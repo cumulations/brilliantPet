@@ -113,6 +113,7 @@ class usersView(APIView):
 
     def get(self, request):
         params = request.query_params
+        gm.log(params)
 
         hasError = authenticate(params)
         if hasError:
@@ -132,6 +133,7 @@ class usersView(APIView):
 
     def post(self, request):
         data = request.data
+
 
         requiredParams = ["userid", "name", "notification_token", "rolls_count_at_home", "password", "email", "address", "profile_image"]
         missingParams = gm.missingParams(requiredParams, data)

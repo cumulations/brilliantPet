@@ -9,10 +9,10 @@ gm = generalClass()
 def getUser(data):
     data = gm.cleanData(data)
     try:
-        if "email" in data:
+        if "email" in data and data["email"] not in ["", None]:
             user = User.objects.filter(email=data["email"], isDeleted=0)
             return user[0]
-        if "userid" in data:
+        if "userid" in data and data["userid"] not in ["", None]:
             user = User.objects.filter(userid=data["userid"], isDeleted=0)
             return user[0]
         else:
@@ -26,10 +26,10 @@ def isUser(data):
 
     data = gm.cleanData(data)
     try:
-        if "email" in data:
+        if "email" in data and data["email"] not in ["", None]:
             user = User.objects.filter(email = data["email"], isDeleted = 0)
             return user[0]
-        if "userid" in data:
+        if "userid" in data and data["userid"] not in ["", None]:
             user = User.objects.filter(userid = data["userid"], isDeleted = 0)
             return user[0]
         else:
