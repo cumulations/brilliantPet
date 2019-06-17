@@ -182,9 +182,9 @@ class usersView(APIView):
 
 
 
-class imageUpload(APIView):
+class imageUploadMultipart(APIView):
 
-    bucketName = "brilliantpet.images"
+    bucketName = "brilliantpet.user-images"
 
     def generate_url(self, fileName):
         baseUrl = "https://s3.{}.amazonaws.com/{}/{}"
@@ -197,34 +197,31 @@ class imageUpload(APIView):
 
     def post(self, request):
 
+        imageHandler = request.FILES.get('image_file')
+        if not imageHandler:
+            return gm.clientError("Required param image_file missing in form-data.")
+
         data = request.data
+        hasError = authenticate(data)
+        if hasError:
+            return hasError
 
-        requiredParams = ["imgtype", "b64body"]
-        missingParams = gm.missingParams(requiredParams, data)
-        if missingParams:
-            missingParams = ", ".join(missingParams)
-            return gm.clientError(missingParamMessage.format(missingParams))
+        userid = getUser(data).userid
 
-        emptyParams = gm.emptyParams(requiredParams, data)
-        if emptyParams:
-            emptyParams = ", ".join(emptyParams)
-            return gm.clientError(emptyParamMessage.format(emptyParams))
-
+        imgtype = request.FILES.get('image_file').name.split(".")[-1].strip()
         randomString = gm.randomStringGenerator(5)
-        imgtype = data["imgtype"]
 
-        b64body = data['b64body']
-        image = base64.b64decode(b64body)
+        image = imageHandler.read()
 
         s3 = gm.getS3resource()
         try:
             mimetype = "image/jpeg"
-            folder = s3.Bucket("brilliantpet.images")
-            ct = float(time.time()) * 1000
-            fileName = "{}_{}.{}".format(randomString, ct, imgtype)
+            folder = s3.Bucket(self.bucketName)
+            ct = int(time.time() * 100000)
+            fileName = "{}_{}{}.{}".format(userid, randomString, ct, imgtype)
             i = folder.put_object(Key=fileName, Body=image, ACL='public-read', ContentType = mimetype)
             download_url = self.generate_url(fileName)
-            gm.log("b64body received : " + str(b64body) + "\nUrl generated : " + download_url)
+            gm.log("Image received : {}".format(image) + "\nUrl generated : " + download_url)
 
             return gm.successResponse(download_url)
 

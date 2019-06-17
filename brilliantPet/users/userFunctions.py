@@ -22,23 +22,9 @@ def getUser(data):
         gm.log(traceback.format_exc())
         return None
 
-def isUser(data):
 
-    data = gm.cleanData(data)
-    try:
-        if "email" in data and data["email"] not in ["", None]:
-            user = User.objects.filter(email = data["email"], isDeleted = 0)
-            return user[0]
-        if "userid" in data and data["userid"] not in ["", None]:
-            user = User.objects.filter(userid = data["userid"], isDeleted = 0)
-            return user[0]
-        else:
-            return None
 
-    except:
-        traceback.print_exc()
-        gm.log(traceback.format_exc())
-        return None
+isUser = getUser     # just for better naming of functions
 
 
 
@@ -123,7 +109,7 @@ def authenticate(data):
 def logout(data, user):
     data = gm.cleanData(data)
     if user.login_token == data["login_token"]:
-        user.login_token  = ""
+        user.login_token = ""
         user.save()
         return True
 
