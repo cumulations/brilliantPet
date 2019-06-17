@@ -109,7 +109,7 @@ def authenticate(data):
 def logout(data, user):
     data = gm.cleanData(data)
     if user.login_token == data["login_token"]:
-        user.login_token  = ""
+        user.login_token = ""
         user.save()
         return True
 
