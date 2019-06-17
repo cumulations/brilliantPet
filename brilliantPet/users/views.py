@@ -184,7 +184,7 @@ class usersView(APIView):
 
 class imageUploadMultipart(APIView):
 
-    bucketName = "brilliantpet.images"
+    bucketName = "brilliantpet.user-images"
 
     def generate_url(self, fileName):
         baseUrl = "https://s3.{}.amazonaws.com/{}/{}"
@@ -206,6 +206,7 @@ class imageUploadMultipart(APIView):
         if hasError:
             return hasError
 
+        userid = getUser(data).userid
 
         imgtype = request.FILES.get('image_file').name.split(".")[-1].strip()
         randomString = gm.randomStringGenerator(5)
@@ -215,12 +216,12 @@ class imageUploadMultipart(APIView):
         s3 = gm.getS3resource()
         try:
             mimetype = "image/jpeg"
-            folder = s3.Bucket("brilliantpet.images")
+            folder = s3.Bucket(self.bucketName)
             ct = int(time.time() * 100000)
-            fileName = "{}_{}.{}".format(randomString, ct, imgtype)
+            fileName = "{}_{}{}.{}".format(userid, randomString, ct, imgtype)
             i = folder.put_object(Key=fileName, Body=image, ACL='public-read', ContentType = mimetype)
             download_url = self.generate_url(fileName)
-            gm.log("b64body received : {}".format(image) + "\nUrl generated : " + download_url)
+            gm.log("Image received : {}".format(image) + "\nUrl generated : " + download_url)
 
             return gm.successResponse(download_url)
 

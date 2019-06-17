@@ -51,7 +51,7 @@ class imageUpload(APIView):
         s3 = gm.getS3resource()
         try:
             mimetype = "image/jpeg"
-            folder = s3.Bucket("brilliantpet.images")
+            folder = s3.Bucket(self.bucketName)
             ct = int(time.time() * 100000)
             fileName = "{}_{}.{}".format(randomString, ct, imgtype)
             i = folder.put_object(Key=fileName, Body=image, ACL='public-read', ContentType = mimetype)
