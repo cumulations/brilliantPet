@@ -1,0 +1,13 @@
+bin
+include
+lib
+
+bin/
+include/
+lib/
+
+*.sql
+*.sqlite
+*.log
+
+brilliantPet/brilliantPet/baseSettings.py.idea/

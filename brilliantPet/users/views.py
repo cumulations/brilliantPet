@@ -199,7 +199,8 @@ class imageUpload(APIView):
 
         data = request.data
 
-        requiredParams = ["imgtype", "b64body"]
+
+        requiredParams = ["image_file"]
         missingParams = gm.missingParams(requiredParams, data)
         if missingParams:
             missingParams = ", ".join(missingParams)
@@ -210,17 +211,18 @@ class imageUpload(APIView):
             emptyParams = ", ".join(emptyParams)
             return gm.clientError(emptyParamMessage.format(emptyParams))
 
-        randomString = gm.randomStringGenerator(5)
-        imgtype = data["imgtype"]
+        imgtype = "jpeg"
 
-        b64body = data['b64body']
+        randomString = gm.randomStringGenerator(5)
+
+        b64body = data['image_file']
         image = base64.b64decode(b64body)
 
         s3 = gm.getS3resource()
         try:
             mimetype = "image/jpeg"
             folder = s3.Bucket("brilliantpet.images")
-            ct = float(time.time()) * 1000
+            ct = int(time.time() * 100000)
             fileName = "{}_{}.{}".format(randomString, ct, imgtype)
             i = folder.put_object(Key=fileName, Body=image, ACL='public-read', ContentType = mimetype)
             download_url = self.generate_url(fileName)
