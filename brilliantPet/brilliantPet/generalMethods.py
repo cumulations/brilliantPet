@@ -6,6 +6,7 @@ import random
 import string
 from brilliantPet import settings
 import boto3
+import os
 
 
 
@@ -157,6 +158,43 @@ class generalClass:
             return self.clientError("Required param 'login_token' missing.")
 
         return None
+
+
+    def generate_url(self, fileName, bucketName):
+        baseUrl = "https://s3.{}.amazonaws.com/{}/{}"
+        return baseUrl.format(region_name, bucketName, fileName)
+
+
+    def uploadToS3(self, bucketName, fileName, file, ContentType = "image/jpeg", ACL = 'public-read'):
+
+        try:
+            s3 = self.getS3resource()
+            folder = s3.Bucket(bucketName)
+            i = folder.put_object(Key=fileName, Body=file, ACL=ACL, ContentType=ContentType)
+
+            download_url = self.generate_url(fileName, bucketName)
+
+            return download_url
+
+        except:
+            traceback.print_exc()
+            self.log(traceback.format_exc())
+            return None
+
+
+    def getFileExtension(self, fileName):
+
+        fileName = str(fileName).strip()
+        name, ext = os.path.splitext(fileName)
+        return ext
+
+    def getUniqueFileName(self, ext = ""):
+
+        ct = int(time.time() * 10000)
+        randomString = self.randomStringGenerator(6)
+        fileName = "{}{}{}".format(randomString, ct, ext)
+
+        return fileName
 
 
 

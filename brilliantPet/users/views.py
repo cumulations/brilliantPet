@@ -110,6 +110,7 @@ class userDevices(APIView):
 
 
 class usersView(APIView):
+    bucketName = "brilliantpet.user-images"
 
     def get(self, request):
         params = request.query_params
@@ -133,15 +134,14 @@ class usersView(APIView):
 
     def post(self, request):
         data = request.data
+        requiredParams = ["userid", "name", "notification_token", "rolls_count_at_home", "password", "email", "address"]
+        data = gm.cleanData(data)
+        data["profile_image"] = ""
 
-
-        requiredParams = ["userid", "name", "notification_token", "rolls_count_at_home", "password", "email", "address", "profile_image"]
         missingParams = gm.missingParams(requiredParams, data)
         if missingParams:
             missingParams = ", ".join(missingParams)
             return gm.clientError(missingParamMessage.format(missingParams))
-
-        requiredParams = requiredParams[:-1]
 
         emptyParams = gm.emptyParams(requiredParams, data)
         if emptyParams:
@@ -154,14 +154,32 @@ class usersView(APIView):
             except:
                 return gm.clientError("rolls_count_at_home should be int.")
 
-        cleanedData = gm.cleanData(data)
 
-        if isUser(cleanedData):
+
+
+        #uploading profile Image
+
+        imageHandler = request.FILES.get("profile_image")
+        if imageHandler:
+            extension = gm.getFileExtension(imageHandler.name)
+            fileName = gm.getUniqueFileName(extension)
+            image = imageHandler.read()
+            mimetype = "image/jpeg"
+
+            downloadUrl = gm.uploadToS3(self.bucketName, fileName, image, mimetype)
+
+            if downloadUrl:
+                data["profile_image"] = downloadUrl     #setting profile image if upload success
+
+        # default profile image if upload failed
+
+
+        if isUser(data):
             return gm.clientError("User already exists.")
 
         else:
             try:
-                user = register(cleanedData)
+                user = register(data)
                 details = {
                     "userid" : user.userid,
                     "name" : user.name,
@@ -186,10 +204,6 @@ class imageUploadMultipart(APIView):
 
     bucketName = "brilliantpet.user-images"
 
-    def generate_url(self, fileName):
-        baseUrl = "https://s3.{}.amazonaws.com/{}/{}"
-        return baseUrl.format(region_name, self.bucketName, fileName)
-
     def get(self, request):
 
         return gm.clientError("GET method is not supported.")
@@ -202,32 +216,24 @@ class imageUploadMultipart(APIView):
             return gm.clientError("Required param image_file missing in form-data.")
 
         data = request.data
+
         hasError = authenticate(data)
         if hasError:
             return hasError
 
         userid = getUser(data).userid
-
-        imgtype = request.FILES.get('image_file').name.split(".")[-1].strip()
-        randomString = gm.randomStringGenerator(5)
-
+        imgtype = gm.getFileExtension(imageHandler.name)
+        fileName = "{}_{}".format(userid, gm.getUniqueFileName(imgtype))
+        mimetype = "image/jpeg"
         image = imageHandler.read()
 
-        s3 = gm.getS3resource()
-        try:
-            mimetype = "image/jpeg"
-            folder = s3.Bucket(self.bucketName)
-            ct = int(time.time() * 100000)
-            fileName = "{}_{}{}.{}".format(userid, randomString, ct, imgtype)
-            i = folder.put_object(Key=fileName, Body=image, ACL='public-read', ContentType = mimetype)
-            download_url = self.generate_url(fileName)
-            gm.log("Image received : {}".format(image) + "\nUrl generated : " + download_url)
+        download_url = gm.uploadToS3(self.bucketName, fileName, image, mimetype)
 
+        if download_url:
+            gm.log("Image received : {}".format(image) + "\nUrl generated : " + download_url)
             return gm.successResponse(download_url)
 
-        except:
-            traceback.print_exc()
-            gm.log(traceback.format_exc())
+        else:
             return gm.clientError("Error while uploading file.")
 
 
