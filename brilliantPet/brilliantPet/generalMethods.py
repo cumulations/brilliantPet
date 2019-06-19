@@ -7,6 +7,7 @@ import string
 from brilliantPet import settings
 import boto3
 import os
+from django.core.validators import validate_email
 
 
 
@@ -80,11 +81,11 @@ class generalClass:
         return None
 
 
-    def log(self, event):
+    def log(self, event, path = "logs"):
         t = time.localtime(time.time())
         currentDate = "{}-{}-{}".format(t.tm_year, t.tm_mon, t.tm_mday)
         currentTime = "{}:{}:{}".format(t.tm_hour, t.tm_min, t.tm_sec)
-        fileName = "logs/{}.{}".format(currentDate, "log")
+        fileName = path + "/{}.{}".format(currentDate, "log")
         try:
             with open(fileName, "a") as file:
                 log = currentTime + "\n" + str(event) + "\n\n"
@@ -93,6 +94,10 @@ class generalClass:
             return True
         except:
             traceback.print_exc()
+
+    def errorLog(self, event):
+
+        return self.log(event, "errorLogs")
 
     def cleanData(self, data):
 
@@ -180,7 +185,7 @@ class generalClass:
 
         except:
             traceback.print_exc()
-            self.log(traceback.format_exc())
+            self.errorLog(traceback.format_exc())
             return None
 
 
@@ -207,6 +212,24 @@ class generalClass:
 
         object.save()
         return object
+
+
+    def getMissingEmptyParams(self, params, data):   # return a error response that contains error code
+
+        missingParams = self.missingParams(params, data)
+        if missingParams:
+            missingParams = ", ".join(missingParams)
+            return self.clientError(missingParamMessage.format(missingParams))
+
+        emptyParams = self.emptyParams(params, data)
+        if emptyParams:
+            emptyParams = ", ".join(emptyParams)
+            return self.clientError(emptyParamMessage.format(emptyParams))
+
+        return None
+
+
+
 
 
 

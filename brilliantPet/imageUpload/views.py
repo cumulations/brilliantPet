@@ -62,5 +62,5 @@ class imageUpload(APIView):
 
         except:
             traceback.print_exc()
-            gm.log(traceback.format_exc())
+            gm.errorLog(traceback.format_exc())
             return gm.clientError("Error while uploading file.")

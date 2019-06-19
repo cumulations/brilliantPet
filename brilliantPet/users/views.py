@@ -195,7 +195,7 @@ class usersView(APIView):
                 return gm.errorResponse(str(e))
 
             except:
-                gm.log(traceback.format_exc())
+                gm.errorLog(traceback.format_exc())
                 return gm.errorResponse("Error while adding user.")
 
 
@@ -355,7 +355,7 @@ class pets(APIView):
 
         except Exception as e:
             traceback.print_exc()
-            print("hello")
+            gm.errorLog(traceback.format_exc())
             return gm.errorResponse("Error while saving device details.")
 
         else:
@@ -404,8 +404,52 @@ class pets(APIView):
 
         except:
             traceback.print_exc()
-            gm.log(traceback.format_exc())
+            gm.errorLog(traceback.format_exc())
             return gm.errorResponse("There was some error while making changes. Try again later.")
+
+
+    def delete(self, request):
+
+        data = gm.cleanData(request.data)
+
+        hasError = authenticate(data)
+        if hasError:
+            return hasError
+
+        requiredParams = ["petid"]
+        emptyOrMissing = gm.getMissingEmptyParams(requiredParams, data)
+
+        if emptyOrMissing:
+            return emptyOrMissing
+
+        try:
+            pet = Pets.objects.get(petid = data["petid"], is_deleted = 0)
+
+        except Pets.DoesNotExist:
+            return gm.clientError("Invalid petid.")
+
+        except :
+            traceback.print_exc()
+            gm.errorLog(traceback.format_exc())
+            return gm.errorResponse("Could not verify petid due to some error.")
+
+        else:
+            pet.is_deleted = 1
+            pet.save()
+            return gm.successResponse("Pet with petid : {} successfully deleted.".format(pet.petid))
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

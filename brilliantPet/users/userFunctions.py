@@ -19,7 +19,7 @@ def getUser(data):
             return None
     except:
         traceback.print_exc()
-        gm.log(traceback.format_exc())
+        gm.errorLog(traceback.format_exc())
         return None
 
 
