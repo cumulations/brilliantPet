@@ -15,3 +15,6 @@ brilliantPet/.idea/*
 .idea/
 .idea
 *.pyc
+__pycache__/
+__pychache__
+

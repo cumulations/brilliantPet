@@ -7,6 +7,7 @@ import string
 from brilliantPet import settings
 import boto3
 import os
+from django.core.validators import validate_email
 
 
 
@@ -68,8 +69,11 @@ class generalClass:
         isEmpty = []
         empty = ["", None]
         for param in requiredParams:
-            if data[param] in empty:
-                isEmpty.append(param)
+            try:
+                if data[param] in empty:
+                    isEmpty.append(param)
+            except:
+                pass
 
         if isEmpty:
             return isEmpty
@@ -77,11 +81,11 @@ class generalClass:
         return None
 
 
-    def log(self, event):
+    def log(self, event, path = "logs"):
         t = time.localtime(time.time())
         currentDate = "{}-{}-{}".format(t.tm_year, t.tm_mon, t.tm_mday)
         currentTime = "{}:{}:{}".format(t.tm_hour, t.tm_min, t.tm_sec)
-        fileName = "logs/{}.{}".format(currentDate, "log")
+        fileName = path + "/{}.{}".format(currentDate, "log")
         try:
             with open(fileName, "a") as file:
                 log = currentTime + "\n" + str(event) + "\n\n"
@@ -90,6 +94,10 @@ class generalClass:
             return True
         except:
             traceback.print_exc()
+
+    def errorLog(self, event):
+
+        return self.log(event, "errorLogs")
 
     def cleanData(self, data):
 
@@ -171,14 +179,13 @@ class generalClass:
             s3 = self.getS3resource()
             folder = s3.Bucket(bucketName)
             i = folder.put_object(Key=fileName, Body=file, ACL=ACL, ContentType=ContentType)
-
             download_url = self.generate_url(fileName, bucketName)
 
             return download_url
 
         except:
             traceback.print_exc()
-            self.log(traceback.format_exc())
+            self.errorLog(traceback.format_exc())
             return None
 
 
@@ -195,6 +202,35 @@ class generalClass:
         fileName = "{}{}{}".format(randomString, ct, ext)
 
         return fileName
+
+
+    def change(self, object, data, changeableList):
+
+        for item in changeableList:
+            if item in data:
+                setattr(object, item, data[item])
+
+        object.save()
+        return object
+
+
+    def getMissingEmptyParams(self, params, data):   # return a error response that contains error code
+
+        missingParams = self.missingParams(params, data)
+        if missingParams:
+            missingParams = ", ".join(missingParams)
+            return self.clientError(missingParamMessage.format(missingParams))
+
+        emptyParams = self.emptyParams(params, data)
+        if emptyParams:
+            emptyParams = ", ".join(emptyParams)
+            return self.clientError(emptyParamMessage.format(emptyParams))
+
+        return None
+
+
+
+
 
 
 
