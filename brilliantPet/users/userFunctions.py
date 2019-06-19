@@ -74,15 +74,22 @@ def register(data):
 
 def login(data, user):
 
+    flag = 0
     cleanedData = gm.cleanData(data)
     password = securePassword(cleanedData["password"])
 
-    if user.email == cleanedData["email"] or user.userid == cleanedData["userid"]:
-        if user.password == password:
-            login_token = gm.randomStringGenerator()
-            user.login_token = login_token
-            user.save()
-            return login_token
+    if "email" in cleanedData and user.email == cleanedData["email"]:
+        flag = 1
+
+    elif "userid" in cleanedData and user.userid == cleanedData["userid"]:
+        flag = 1
+
+    if flag == 1 and user.password == password:
+
+        login_token = gm.randomStringGenerator()
+        user.login_token = login_token
+        user.save()
+        return login_token
 
     return None
 

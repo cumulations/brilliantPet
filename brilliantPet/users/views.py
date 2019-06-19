@@ -323,7 +323,7 @@ class pets(APIView):
 
     def post(self, request):
         requiredParams = [ "name", "breed", "birthday", "image_url", "weight", "weight_unit"]
-        data = request.data
+        data = gm.cleanData(request.data)
 
         hasError = authenticate(data)
         if hasError:
@@ -342,7 +342,6 @@ class pets(APIView):
             return gm.clientError((emptyParamMessage.format(emptyParams)))
 
         user = getUser(data)
-        data = gm.cleanData(data)
 
         try:
             pet = user.pets_set.create(name = data["name"],\
@@ -363,6 +362,63 @@ class pets(APIView):
             data["petid"] = pet.petid
             data["image_url"] = pet.image_url
             return gm.successResponse(data)
+
+
+
+    def put(self, request):
+
+        data = gm.cleanData(request.data)
+
+        hasError = authenticate(data)
+        if hasError:
+            return hasError
+
+        requiredParams = ["petid"]
+        missingParams = gm.missingParams(requiredParams, data)
+        if missingParams:
+            missingParams = ", ".join(missingParams)
+            return gm.clientError(missingParamMessage.format(missingParams))
+
+        changeable = ["petid", "name", "breed", "birthday", "image_url", "weight", "weight_unit"]
+        emptyParams = gm.emptyParams(changeable, data)
+        if emptyParams:
+            emptyParams = ", ".join(emptyParams)
+            return gm.clientError(emptyParamMessage.format(emptyParams))
+
+        user = getUser(data)
+        pet = user.pets_set.filter(petid = data["petid"], is_deleted = 0)
+
+        if not pet:
+            return gm.clientError("Invalid petid.")
+
+        pet = pet[0]
+        try:
+            pet = gm.change(pet, data, changeable)
+
+            returnDict = {}
+            for item in changeable:
+                returnDict[item] = getattr(pet, item)
+
+            return gm.successResponse(returnDict)
+
+
+        except:
+            traceback.print_exc()
+            gm.log(traceback.format_exc())
+            return gm.errorResponse("There was some error while making changes. Try again later.")
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

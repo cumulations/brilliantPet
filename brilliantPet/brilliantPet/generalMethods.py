@@ -68,8 +68,11 @@ class generalClass:
         isEmpty = []
         empty = ["", None]
         for param in requiredParams:
-            if data[param] in empty:
-                isEmpty.append(param)
+            try:
+                if data[param] in empty:
+                    isEmpty.append(param)
+            except:
+                pass
 
         if isEmpty:
             return isEmpty
@@ -171,7 +174,6 @@ class generalClass:
             s3 = self.getS3resource()
             folder = s3.Bucket(bucketName)
             i = folder.put_object(Key=fileName, Body=file, ACL=ACL, ContentType=ContentType)
-
             download_url = self.generate_url(fileName, bucketName)
 
             return download_url
@@ -195,6 +197,17 @@ class generalClass:
         fileName = "{}{}{}".format(randomString, ct, ext)
 
         return fileName
+
+
+    def change(self, object, data, changeableList):
+
+        for item in changeableList:
+            if item in data:
+                setattr(object, item, data[item])
+
+        object.save()
+        return object
+
 
 
 
