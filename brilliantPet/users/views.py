@@ -465,6 +465,36 @@ class pets(APIView):
 
 
 
+class notificationUpdate(APIView):
+
+    def post(self, request):
+        data = gm.cleanData(request.data)
+
+        hasError = authenticate(data)
+        if hasError:
+            return hasError
+
+        requiredParams = ["notification_token"]
+        emptyOrMissing = gm.getMissingEmptyParams(requiredParams, data)
+
+        if emptyOrMissing:
+            return emptyOrMissing
+        try:
+            user = getUser(data)
+            user.notification_token = data["notification_token"]
+
+            user.save()
+            return gm.successResponse("notification_token updated successfully.")
+        except:
+            traceback.print_exc()
+            gm.errorLog(traceback.format_exc())
+            return gm.errorResponse("There was an error while updating notification_token")
+
+
+
+
+
+
 
 
 
