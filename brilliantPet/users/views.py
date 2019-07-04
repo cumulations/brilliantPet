@@ -67,14 +67,14 @@ class userDevices(APIView):
             emptyParams = ", ".join(emptyParams)
             return gm.clientError(emptyParamMessage.format(emptyParams))
 
-        try:
-            MachineDetails.objects.get(pk = data["machine_id"])
-            return gm.clientError("machine_id exists. Please provide a unique machine_id")
-        except:
-            machineid = data["machine_id"].strip()
-            userid = data["userid"].strip()
-            name = data["name"].strip()
-            status = int(data["status"].strip())
+        # try:
+        #     MachineDetails.objects.get(pk = data["machine_id"], isremoved = 0)
+        #     return gm.clientError("machine_id exists. Please provide a unique machine_id")
+        # except:
+        machineid = data["machine_id"].strip()
+        userid = data["userid"].strip()
+        name = data["name"].strip()
+        status = int(data["status"].strip())
 
         defaultParams = {
             "mode" : "manual",
@@ -94,14 +94,34 @@ class userDevices(APIView):
         isRemoved = defaultParams["isremoved"]
         user_role = defaultParams['user_role']
 
+        user = getUser(data)
 
         try:
-            user = getUser(data)
+
             user.machinedetails_set.create(machine_id = machineid, name = name, status = status, \
                                      mode = mode, firmware = firmware, network = network, isremoved = isRemoved,\
                                      user_role = user_role)
+
+        except  IntegrityError as e:
+            machine = MachineDetails.objects.get(pk = data["machine_id"])
+            machine.machine_id = machineid
+            machine.name = name
+            machine.userid = user
+            machine.status = status
+            machine.mode = mode
+            machine.firmware = firmware
+            machine.network = network
+            machine.isremoved = isRemoved
+            machine.user_role = user_role
+
+            machine.save()
+
+            return gm.successResponse(data)
+
+
         except Exception as e:
             traceback.print_exc()
+            gm.errorLog(traceback.format_exc())
             return gm.errorResponse("Error while saving device details.")
 
         else:
@@ -180,6 +200,7 @@ class usersView(APIView):
         else:
             try:
                 user = register(data)
+                token = login(data, user)
                 details = {
                     "userid" : user.userid,
                     "name" : user.name,
@@ -187,7 +208,8 @@ class usersView(APIView):
                     "rolls_count_at_home" : user.rolls_count_at_home,
                     "email" : user.email,
                     "address" : user.address,
-                    "profile_image" : user.profile_image
+                    "profile_image" : user.profile_image,
+                    "login_token" : token
                 }
                 return gm.successResponse(details)
 
@@ -366,6 +388,8 @@ class pets(APIView):
 
 
     def put(self, request):
+
+        gm.errorLog("This")
 
         data = gm.cleanData(request.data)
 
