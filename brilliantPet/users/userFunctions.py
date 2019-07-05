@@ -125,6 +125,28 @@ def logout(data, user):
 
 
 
+def addNotificationToken(data, user):
+
+    try:
+
+        notification = notification_token.objects.get(userid = user.userid, dev_type = data["dev_type"])
+        notification.token = data["notification_token"]
+        notification.save()
+
+    except notification_token.DoesNotExist:
+
+        user.notification_token_set.create(token = data["notification_token"], dev_type = data["dev_type"])
+
+    except Exception as e:
+
+        traceback.print_exc()
+        gm.errorLog(traceback.format_exc())
+        return False
+
+    return True
+
+
+
 
 
 

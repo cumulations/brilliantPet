@@ -474,21 +474,24 @@ class notificationUpdate(APIView):
         if hasError:
             return hasError
 
-        requiredParams = ["notification_token"]
+        requiredParams = ["notification_token", "dev_type"]
         emptyOrMissing = gm.getMissingEmptyParams(requiredParams, data)
 
         if emptyOrMissing:
             return emptyOrMissing
-        try:
-            user = getUser(data)
-            user.notification_token = data["notification_token"]
 
-            user.save()
+        user = getUser(data)
+        tokenAdded = addNotificationToken(data, user)
+
+        if tokenAdded:
             return gm.successResponse("notification_token updated successfully.")
-        except:
-            traceback.print_exc()
-            gm.errorLog(traceback.format_exc())
+
+        else:
             return gm.errorResponse("There was an error while updating notification_token")
+
+
+
+
 
 
 
