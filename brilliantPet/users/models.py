@@ -33,7 +33,6 @@ class User(models.Model):
     address = models.TextField(blank=False, null=False)
     name = models.CharField(max_length=50, blank=False, null=False)
     profile_image = models.TextField(blank=False, null=False, default=defaultProfileImage)
-    notification_token = models.CharField(max_length=145, blank=True, null=False)
     rolls_count_at_home = models.IntegerField(blank=False, null=False)
     password = models.CharField(max_length = 512, null = False, blank = False)
     login_token = models.CharField(max_length=256, null = True, blank = True)
@@ -54,6 +53,41 @@ class Pets(models.Model):
     weight = models.IntegerField(null = False)
     weight_unit = models.CharField(max_length=45, null = False)
     is_deleted = models.IntegerField(null = False, blank=False, default=0)
+
+
+
+
+class events(models.Model):
+
+    eventid = models.AutoField(primary_key=True)
+
+    type = models.CharField(max_length=45, null = False)
+    date = models.DateTimeField(auto_now_add=True)
+    value = models.TextField(null = False, blank = False)
+    machine_id = models.ForeignKey(MachineDetails, on_delete=models.CASCADE, null= False, blank = False)
+    userid = models.ForeignKey(User, on_delete=models.CASCADE, null = False, blank = False)
+
+    # def __str__(self):
+    #
+    #     return str({
+    #         "eventid" : self.eventid,
+    #         "date" : self.date,
+    #         "value" : self.value,
+    #         "type" : self.type
+    #     })
+
+
+
+
+class notification_token(models.Model):
+
+    id = models.AutoField(primary_key=True)
+
+    userid = models.ForeignKey(User, on_delete=models.CASCADE, null = False, blank = False)
+    token = models.CharField(max_length=200, null = False, blank = False)
+    dev_type = models.CharField(max_length=15, null = False, blank = False)
+
+
 
 
 

@@ -474,21 +474,69 @@ class notificationUpdate(APIView):
         if hasError:
             return hasError
 
-        requiredParams = ["notification_token"]
+        requiredParams = ["notification_token", "dev_type"]
         emptyOrMissing = gm.getMissingEmptyParams(requiredParams, data)
 
         if emptyOrMissing:
             return emptyOrMissing
-        try:
-            user = getUser(data)
-            user.notification_token = data["notification_token"]
 
-            user.save()
+        user = getUser(data)
+        tokenAdded = addNotificationToken(data, user)
+
+        if tokenAdded:
             return gm.successResponse("notification_token updated successfully.")
+
+        else:
+            return gm.errorResponse("There was an error while updating notification_token")
+
+
+
+
+class Event(APIView):
+
+    def get(self, request):
+
+        params = gm.cleanData(request.query_params)
+        hasError = authenticate(params)
+        if hasError:
+            return hasError
+
+        requiredParams = ["userid", "machine_id", "startDate", "endDate"]
+        emptyOrMissing = gm.getMissingEmptyParams(requiredParams, params)
+
+        if emptyOrMissing:
+            return emptyOrMissing
+
+        startDate = params["startDate"]
+        endDate = params["endDate"]
+
+        try:
+
+            ev = events.objects.filter(date__range = (startDate, endDate)).order_by("-date")
+            retSet = []
+
+            for item in ev:
+                retSet.append({
+                "eventid" : item.eventid,
+                "date" : item.date,
+                "value" : item.value,
+                "type" : item.type
+            })
+
+
+            return gm.successResponse(retSet)
+
         except:
             traceback.print_exc()
             gm.errorLog(traceback.format_exc())
-            return gm.errorResponse("There was an error while updating notification_token")
+            return gm.errorResponse("There was some error generating response")
+
+
+
+
+
+
+
 
 
 

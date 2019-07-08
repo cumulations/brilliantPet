@@ -11,7 +11,8 @@ urlpatterns = [
     url(r"^pets$", pets.as_view()),
     url(r"^login$", userLogin.as_view()),
     url(r"^logout$", userLogout.as_view()),
-    url(r"^tokenupdate$", notificationUpdate.as_view())
+    url(r"^tokenupdate$", notificationUpdate.as_view()),
+    url(r"^events$", Event.as_view())
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
