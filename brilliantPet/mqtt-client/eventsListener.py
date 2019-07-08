@@ -41,6 +41,7 @@ def on_message(client, userdata, msg):
     try:
         con = pymysql.connect("localhost", "root", "password", "brilliantPet")
     except Exception as e:
+        traceback.print_exc()
         gm.log(traceback.format_exc())
         con.close()
         return
@@ -74,6 +75,7 @@ def on_message(client, userdata, msg):
         except Exception as e:
 
             traceback.print_exc()
+            gm.log(traceback.format_exc())
             con.rollback()
 
     finally:
