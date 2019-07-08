@@ -59,13 +59,22 @@ class Pets(models.Model):
 
 class events(models.Model):
 
-    eventit = models.AutoField(primary_key=True)
+    eventid = models.AutoField(primary_key=True)
 
     type = models.CharField(max_length=45, null = False)
     date = models.DateTimeField(auto_now_add=True)
     value = models.TextField(null = False, blank = False)
     machine_id = models.ForeignKey(MachineDetails, on_delete=models.CASCADE, null= False, blank = False)
     userid = models.ForeignKey(User, on_delete=models.CASCADE, null = False, blank = False)
+
+    # def __str__(self):
+    #
+    #     return str({
+    #         "eventid" : self.eventid,
+    #         "date" : self.date,
+    #         "value" : self.value,
+    #         "type" : self.type
+    #     })
 
 
 

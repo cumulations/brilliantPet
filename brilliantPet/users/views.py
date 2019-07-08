@@ -492,6 +492,51 @@ class notificationUpdate(APIView):
 
 
 
+class Event(APIView):
+
+    def get(self, request):
+
+        params = gm.cleanData(request.query_params)
+        hasError = authenticate(params)
+        if hasError:
+            return hasError
+
+        requiredParams = ["userid", "machine_id", "startDate", "endDate"]
+        emptyOrMissing = gm.getMissingEmptyParams(requiredParams, params)
+
+        if emptyOrMissing:
+            return emptyOrMissing
+
+        startDate = params["startDate"]
+        endDate = params["endDate"]
+
+        try:
+
+            ev = events.objects.filter(date__range = (startDate, endDate)).order_by("-date")
+            retSet = []
+
+            for item in ev:
+                retSet.append({
+                "eventid" : item.eventid,
+                "date" : item.date,
+                "value" : item.value,
+                "type" : item.type
+            })
+
+
+            return gm.successResponse(retSet)
+
+        except:
+            traceback.print_exc()
+            gm.errorLog(traceback.format_exc())
+            return gm.errorResponse("There was some error generating response")
+
+
+
+
+
+
+
 
 
 

@@ -1,0 +1,14 @@
+CREATE TABLE `users_events` (`eventit` integer AUTO_INCREMENT NOT NULL PRIMARY KEY, `type` varchar(45) NOT NULL, `date` datetime(6) NOT NULL, `value` longtext NOT NULL, `machine_id_id` varchar(100) NOT NULL);
+
+CREATE TABLE `users_notification_token` (`id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY, `token` varchar(200) NOT NULL, `dev_type` varchar(15) NOT NULL);
+
+ALTER TABLE `users_user` DROP COLUMN `notification_token`;
+
+ALTER TABLE `users_notification_token` ADD COLUMN `userid_id` varchar(100) NOT NULL;
+
+ALTER TABLE `users_events` ADD COLUMN `userid_id` varchar(100) NOT NULL;
+ALTER TABLE `users_events` ADD CONSTRAINT `users_events_machine_id_id_662365d5_fk_users_mac` FOREIGN KEY (`machine_id_id`) REFERENCES `users_machinedetails` (`machine_id`);
+ALTER TABLE `users_notification_token` ADD CONSTRAINT `users_notification_token_userid_id_d275134d_fk_users_user_userid` FOREIGN KEY (`userid_id`) REFERENCES `users_user` (`userid`);
+ALTER TABLE `users_events` ADD CONSTRAINT `users_events_userid_id_0f1b4f5f_fk_users_user_userid` FOREIGN KEY (`userid_id`) REFERENCES `users_user` (`userid`);
+COMMIT;
+

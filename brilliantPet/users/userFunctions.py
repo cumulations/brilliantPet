@@ -129,7 +129,7 @@ def addNotificationToken(data, user):
 
     try:
 
-        notification = notification_token.objects.get(userid = user.userid, dev_type = data["dev_type"])
+        notification = notification_token.objects.get(userid = user.userid, dev_type = data["dev_type"], token = data["notification_token"])
         notification.token = data["notification_token"]
         notification.save()
 

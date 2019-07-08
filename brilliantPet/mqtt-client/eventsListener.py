@@ -1,7 +1,19 @@
 import paho.mqtt.client as mqtt
+import sys
 import pymysql
+import traceback
+import json
+from datetime import datetime
+
+sys.path.append("../")
+
+from brilliantPet.generalMethods import generalClass
+
+
 
 # The callback for when the client receives a CONNACK response from the server.
+gm = generalClass()
+
 
 def on_connect(client, userdata, flags, rc):
 
@@ -11,15 +23,63 @@ def on_connect(client, userdata, flags, rc):
     # reconnect then subscriptions will be renewed.
     client.subscribe("/bp/+/event")
 
+    log = """
+    MQTT client connected. \n
+    Flags : {},\n
+    userdata : {} \n,
+    resultCode : {}
+    """
+    log = log.format(flags, userdata, rc)
+    gm.log(log)
+
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    print(dir(msg))
-    print(msg.topic+" "+str(msg.payload))
+
+    # print(msg.topic+" "+str(msg.payload))
     device = msg.topic.split("/")[-2]
     print(device)
-    con = pymysql.connect("localhost", "root", "password", "brilliantPet")
-    print("connected to database.")
-    con.close()
+    try:
+        con = pymysql.connect("localhost", "root", "password", "brilliantPet")
+    except Exception as e:
+        gm.log(traceback.format_exc())
+        con.close()
+        return
+    else:
+
+        try:
+            cursor = con.cursor()
+            sql = "select userid, machine_id  from users_machinedetails where machine_id like '{}' and isremoved = 0;".format(device)
+            cursor.execute(sql)
+            query = cursor.fetchall()
+
+            if not query:
+                gm.log("{}\n{}".format(msg.topic, msg.payload))
+                print("device didn't exist")
+                return
+
+
+            mes = msg.payload.decode('utf-8')
+            mes = mes.replace("\n", "")
+            message = json.loads(mes)
+            eventType = str(message["type"])
+            print("message received : ", message)
+            sql = "insert into users_events (type, value, machine_id_id, userid_id, date) values ('{}', '{}', '{}', '{}', '{}')"
+            sql = sql.format(eventType, json.dumps(message), query[0][1], query[0][0], datetime.now())
+            cursor.execute(sql)
+            con.commit()
+            print("message successfully saved.")
+
+
+
+        except Exception as e:
+
+            traceback.print_exc()
+            con.rollback()
+
+    finally:
+        con.close()
+
+
 
 
 
