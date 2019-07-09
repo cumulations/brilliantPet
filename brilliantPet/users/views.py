@@ -471,6 +471,7 @@ class notificationUpdate(APIView):
         gm.log(dir(request))
         data = gm.cleanData(request.data)
         gm.log(data)
+        gm.log(request.query_params)
         hasError = authenticate(data)
         if hasError:
             return hasError
