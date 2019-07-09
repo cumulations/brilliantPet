@@ -9,6 +9,7 @@ sys.path.append("../")
 
 from brilliantPet.generalMethods import generalClass
 
+#for saving events for devices
 
 
 # The callback for when the client receives a CONNACK response from the server.
