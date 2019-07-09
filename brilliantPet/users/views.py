@@ -512,7 +512,7 @@ class Event(APIView):
 
         try:
 
-            ev = events.objects.filter(date__range = (startDate, endDate)).order_by("-date")
+            ev = events.objects.filter(date__range = (startDate, endDate), machine_id = params["machine_id"], userid = params["userid"]).order_by("-date")
             retSet = []
 
             for item in ev:

@@ -8,7 +8,12 @@ from datetime import datetime
 sys.path.append("/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/../")
 
 from brilliantPet.generalMethods import generalClass
+<<<<<<< HEAD
 p = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/logs"
+=======
+
+#for saving events for devices
+>>>>>>> 9624cc3af5e0dfac2ef02f6ab9ff1f735d2285a2
 
 
 # The callback for when the client receives a CONNACK response from the server.
