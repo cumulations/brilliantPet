@@ -39,7 +39,7 @@ def on_message(client, userdata, msg):
     device = msg.topic.split("/")[-2]
     print(device)
     try:
-        con = pymysql.connect("localhost", "root", "password", "brilliantPet")
+        con = pymysql.connect("localhost", "ubuntu", "password", "brilliantPet")
     except Exception as e:
         traceback.print_exc()
         gm.log(traceback.format_exc())
