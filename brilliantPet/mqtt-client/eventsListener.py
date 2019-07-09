@@ -55,7 +55,7 @@ def on_message(client, userdata, msg):
             query = cursor.fetchall()
 
             if not query:
-                gm.log("{}\n{}".format(msg.topic, msg.payload))
+                gm.log("{}\n{}\n{}".format(msg.topic, msg.payload, "device doesn't exist"))
                 print("device didn't exist")
                 return
 
@@ -69,6 +69,7 @@ def on_message(client, userdata, msg):
             sql = sql.format(eventType, json.dumps(message), query[0][1], query[0][0], datetime.now())
             cursor.execute(sql)
             con.commit()
+            gm.log("{}\n{}\n{}".format(msg.topic, msg.payload, "saved successfully"))
             print("message successfully saved.")
 
 
