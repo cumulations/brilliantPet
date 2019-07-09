@@ -468,6 +468,7 @@ class pets(APIView):
 class notificationUpdate(APIView):
 
     def post(self, request):
+        gm.log(request)
         data = gm.cleanData(request.data)
 
         hasError = authenticate(data)
