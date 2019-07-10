@@ -8,12 +8,7 @@ from datetime import datetime
 sys.path.append("/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/../")
 
 from brilliantPet.generalMethods import generalClass
-<<<<<<< HEAD
 p = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/logs"
-=======
-
-#for saving events for devices
->>>>>>> 9624cc3af5e0dfac2ef02f6ab9ff1f735d2285a2
 
 
 # The callback for when the client receives a CONNACK response from the server.
@@ -59,11 +54,7 @@ def on_message(client, userdata, msg):
             query = cursor.fetchall()
 
             if not query:
-<<<<<<< HEAD
                 gm.log("{}\n{}".format(msg.topic, msg.payload), p)
-=======
-                gm.log("{}\n{}\n{}".format(msg.topic, msg.payload, "device doesn't exist"))
->>>>>>> 9ddd1662d800c84444825c7a54dd936db249a654
                 print("device didn't exist")
                 return
 
@@ -77,7 +68,6 @@ def on_message(client, userdata, msg):
             sql = sql.format(eventType, json.dumps(message), query[0][1], query[0][0], datetime.now())
             cursor.execute(sql)
             con.commit()
-            gm.log("{}\n{}\n{}".format(msg.topic, msg.payload, "saved successfully"))
             print("message successfully saved.")
 
 
