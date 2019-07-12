@@ -6,14 +6,14 @@ import json
 from datetime import datetime
 from pyfcm import FCMNotification
 
-# sysPath = "../"
-sysPath = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/../"
+sysPath = "../"
+# sysPath = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/../"
 sys.path.append("/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/../")
 
 from brilliantPet.generalMethods import generalClass
-p = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/logs"
+# p = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/logs"
 
-# p = "./logs"
+p = "./logs"
 
 
 gm = generalClass()
@@ -102,11 +102,11 @@ def on_message(client, userdata, msg):
 
             mes = msg.payload.decode('utf-8')
             mes = mes.replace("\n", "")
-            message = json.loads(mes)
-            eventType = str(message["type"])
-            print("message received : ", message)
+            payload = json.loads(mes)
+            eventType = str(payload["type"])
+            print("message received : ", payload)
             sql = "insert into users_events (type, value, machine_id_id, userid_id, date) values ('{}', '{}', '{}', '{}', '{}')"
-            sql = sql.format(eventType, json.dumps(message), query[0][1], query[0][0], datetime.now())
+            sql = sql.format(eventType, json.dumps(payload), query[0][1], query[0][0], datetime.now())
             cursor.execute(sql)
             con.commit()
             gm.log("{}\n{}\nmessage successfully saved.".format(msg.topic, msg.payload), p)
@@ -117,12 +117,17 @@ def on_message(client, userdata, msg):
             sql = "select token from users_notification_token where userid_id like '{}';".format(query[0][0])
             cursor.execute(sql)
             query3 = cursor.fetchall()
-            message_body = eventType
-            event = "{} - Event".format(query[0][2])
+            message = eventType
+            title = "{} - Event".format(query[0][2])
+            data_message = {
+                "device_id" : device,
+                "device_name" : query[0][2],
+                "payload" : payload
+            }
             print(query3)
             for tokens in query3:
                 print("token : ", tokens[0])
-                fcmPush(tokens[0], event, message, message_body)
+                fcmPush(tokens[0], title, data_message, message)
 
 
 
