@@ -4,15 +4,42 @@ import pymysql
 import traceback
 import json
 from datetime import datetime
+from pyfcm import FCMNotification
 
-sys.path.append("/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/../")
+sysPath = "../"
+# sysPath = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/../"
+sys.path.append(sysPath)
 
 from brilliantPet.generalMethods import generalClass
-p = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/logs"
+# p = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/logs"
+
+p = "./logs"
 
 
-# The callback for when the client receives a CONNACK response from the server.
 gm = generalClass()
+api_key = "AAAAJAR2tx8:APA91bHRrdbSWalshyjRL-x64k6ckT8zhFG93pXG6h49k5gFnRzoHUzn7W2HuwLTJB2pbfVcSNQx3OzCxDyhn9ZUONBs2SwiFbIvXYzjPFDvohgDgLSxdjv-UH-3hHx8BCNsMqgd-cQQ"
+
+
+def fcmPush(registration_id, message_title, data_message = None, message_body = "This is a test notification."):
+
+    push_service = FCMNotification(api_key=api_key)
+    result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
+                                               data_message=data_message, message_body = message_body)
+    if result["success"] > 0:
+        print("this is the payload pushed : ", data_message)
+        print("FCM push successful")
+        return True
+
+    else:
+        gm.log(result, p)
+        print(result)
+        print("FCM push failed.")
+        return False
+
+
+
+
+
 
 
 def on_connect(client, userdata, flags, rc):
@@ -49,15 +76,28 @@ def on_message(client, userdata, msg):
 
         try:
             cursor = con.cursor()
-            sql = "select userid, machine_id  from users_machinedetails where machine_id like '{}' and isremoved = 0;".format(device)
+
+            #checking if the machine and user exists or not
+
+            sql = "select userid, machine_id, name  from users_machinedetails where machine_id like '{}' and isremoved = 0;".format(device)
             cursor.execute(sql)
             query = cursor.fetchall()
 
             if not query:
-                gm.log("{}\n{}".format(msg.topic, msg.payload), p)
+                gm.log("{}\n{}\n{}".format(msg.topic, msg.payload, "Device didn't exist."), p)
                 print("device didn't exist")
                 return
 
+            sql = "select userid from users_user where userid like '{}' and isDeleted = 0;".format(query[0][0])
+            cursor.execute(sql)
+            query1 = cursor.fetchall()
+
+            if not query1:
+                gm.log("{}\n{}\n{}".format(msg.topic, msg.payload, "User doesn't exist or is deleted."), p)
+                print("user doesn't exit or is deleted.")
+                return
+
+            #saving the payload to the db after validated
 
             mes = msg.payload.decode('utf-8')
             mes = mes.replace("\n", "")
@@ -68,7 +108,22 @@ def on_message(client, userdata, msg):
             sql = sql.format(eventType, json.dumps(message), query[0][1], query[0][0], datetime.now())
             cursor.execute(sql)
             con.commit()
+            gm.log("{}\n{}\nmessage successfully saved.".format(msg.topic, msg.payload), p)
             print("message successfully saved.")
+
+            #sending notification to the user
+
+            sql = "select token from users_notification_token where userid_id like '{}';".format(query[0][0])
+            cursor.execute(sql)
+            query3 = cursor.fetchall()
+            message_body = eventType
+            event = "{} - Event".format(query[0][2])
+            print(query3)
+            for tokens in query3:
+                print("token : ", tokens[0])
+                fcmPush(tokens[0], event, message, message_body)
+
+
 
 
 
