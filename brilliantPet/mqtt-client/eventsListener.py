@@ -26,12 +26,13 @@ def fcmPush(registration_id, message_title, data_message = None, message_body = 
     result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
                                                data_message=data_message, message_body = message_body)
     if result["success"] > 0:
+        gm.log("Token : {}\nResult : {}\nSuccessful".format(registration_id, result), p)
         print("this is the payload pushed : ", data_message)
         print("FCM push successful")
         return True
 
     else:
-        gm.log(result, p)
+        gm.log("Token : {}\nResult : {}\nFailed".format(registration_id, result), p)
         print(result)
         print("FCM push failed.")
         return False
