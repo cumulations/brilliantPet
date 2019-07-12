@@ -6,14 +6,14 @@ import json
 from datetime import datetime
 from pyfcm import FCMNotification
 
-sysPath = "../"
-# sysPath = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/../"
+# sysPath = "../"
+sysPath = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/../"
 sys.path.append("/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/../")
 
 from brilliantPet.generalMethods import generalClass
-# p = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/logs"
+p = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/logs"
 
-p = "./logs"
+# p = "./logs"
 
 
 gm = generalClass()
