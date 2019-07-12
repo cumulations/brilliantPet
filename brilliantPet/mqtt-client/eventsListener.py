@@ -8,7 +8,7 @@ from pyfcm import FCMNotification
 
 # sysPath = "../"
 sysPath = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/../"
-sys.path.append(sysPath)
+sys.path.append("/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/../")
 
 from brilliantPet.generalMethods import generalClass
 p = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/logs"
