@@ -66,6 +66,19 @@ def on_message(client, userdata, msg):
     # print(msg.topic+" "+str(msg.payload))
     device = msg.topic.split("/")[-2]
     print(device)
+    impEvents = ["PAD_ADVANCE_ACK", "LOOKIN", "ANIMAL_DETECTION"]
+    mes = msg.payload.decode('utf-8')
+    mes = mes.replace("\n", "")
+    payload = json.loads(mes)
+    eventType = str(payload["type"])
+
+    if eventType not in impEvents:
+        log = "{}\n{}\nmessage received but not saved.".format(msg.topic, msg.payload)
+        print(log)
+        gm.log(log, p)
+        return
+
+
     try:
         con = pymysql.connect("localhost", "ubuntu", "password", "brilliantPet")
     except Exception as e:
@@ -99,11 +112,6 @@ def on_message(client, userdata, msg):
                 return
 
             #saving the payload to the db after validated
-
-            mes = msg.payload.decode('utf-8')
-            mes = mes.replace("\n", "")
-            payload = json.loads(mes)
-            eventType = str(payload["type"])
             print("message received : ", payload)
             sql = "insert into users_events (type, value, machine_id_id, userid_id, date) values ('{}', '{}', '{}', '{}', '{}')"
             sql = sql.format(eventType, json.dumps(payload), query[0][1], query[0][0], datetime.now())
