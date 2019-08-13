@@ -78,8 +78,13 @@ class imageUpload(APIView):
     def post(self, request):
 
         imageHandler = request.FILES.get('image_file')
-        print(request.data)
+
+        Key = list(request._files.keys())[0]
+        log = "This is the log for the key '{}' : {}".format(Key, request._files.get(Key).read())
+        print(log)
+        gm.log(log)
         gm.log(event = request.data)
+
         if not imageHandler:
             return gm.clientError("Required param image_file missing in form-data.")
 

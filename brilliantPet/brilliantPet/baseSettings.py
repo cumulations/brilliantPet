@@ -51,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'request_logging.middleware.LoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'brilliantPet.urls'
@@ -120,5 +121,40 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
+
+LOGGING = {
+      'version': 1,
+      'disable_existing_loggers': False,
+      'handlers': {
+          'file': {
+              'level': 'DEBUG',
+              'class': 'logging.FileHandler',
+              'filename': './logs/debug.log',
+          },
+      },
+      'loggers': {
+          'django': {
+              'handlers': ['file'],
+              'level': 'DEBUG',
+              'propagate': False,
+          },
+      },
+  }
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers': {
+#         'django.request': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',  # change debug level as appropiate
+#             'propagate': False,
+#         },
+#     },
+# }
 
 STATIC_URL = '/static/'
