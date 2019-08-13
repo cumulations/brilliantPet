@@ -122,9 +122,9 @@ class generalClass:
         return sha3.hexdigest()
 
 
-    def randomStringGenerator(self, ssize = 4):
+    def randomStringGenerator(self, ssize = 4, usePunctuation = True):
 
-        punctuation = "!^*()"
+        punctuation = "!^*()" if usePunctuation == True else ""
         r = ''.join([random.choice(string.ascii_letters + string.digits + punctuation) for n in range(ssize)])
         return r
 
@@ -150,6 +150,7 @@ class generalClass:
 
         s3 = boto3.resource("s3", aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key,
                        region_name=region_name)
+
         return s3
 
 
