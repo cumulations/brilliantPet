@@ -7,6 +7,11 @@ import string
 from brilliantPet import settings
 import boto3
 import os
+import types
+import pprint
+
+
+pp = pprint.PrettyPrinter(indent = 2)
 from django.core.validators import validate_email
 
 
@@ -229,6 +234,23 @@ class generalClass:
 
         return None
 
+
+    def printEverythingOfObject(self, obj):
+        for x in dir(obj):
+            try:
+                atr = getattr(obj, x)
+                if type(atr) == types.FunctionType:
+                    try:
+                        pp.pprint("result from method {} is {}".format(x, atr()))
+                    except Exception as e:
+                        pp.pprint("exception for method {} is {}".format(x, e))
+                else:
+                    try:
+                        pp.pprint("result from attribute {} is {}".format(x, atr))
+                    except Exception as e:
+                        pp.pprint("exception for attribute {} is {}".format(x, e))
+            except Exception as e:
+                print(e)
 
 
 
