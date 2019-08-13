@@ -204,7 +204,7 @@ class generalClass:
     def getUniqueFileName(self, ext = ""):
 
         ct = int(time.time() * 10000)
-        randomString = self.randomStringGenerator(6)
+        randomString = self.randomStringGenerator(6, usePunctuation=False)
         fileName = "{}{}{}".format(randomString, ct, ext)
 
         return fileName

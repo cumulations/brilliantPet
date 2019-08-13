@@ -78,25 +78,22 @@ class imageUpload(APIView):
     def post(self, request):
 
         imageHandler = request.FILES.get('image_file')
-        print(dir(request))
 
-        gm.log("This is _stream: {}".format(request._stream.read()))
-        gm.log("This is load_stream: {}".format(request._load_stream()))
-        gm.log("This is _load_data_and_files: {}".format(request._load_data_and_files()))
         Key = list(request._files.keys())[0]
-        log = "This is the log for the key '{}' : {}".format(Key, request._files.get(Key).read())
-        # print(log)
-        gm.log(log)
-        gm.log(event = request.data)
+        gm.log("Key in parameter : {}".format(Key))
 
         if not imageHandler:
             return gm.clientError("Required param image_file missing in form-data.")
+
+
 
         imgName = ".".join(imageHandler.name.split(".")[:-1])
         imgType = gm.getFileExtension(imageHandler.name)
         fileName = "{}_{}".format(imgName, gm.getUniqueFileName(imgType))
         mimetype = "image/jpeg"
         image = imageHandler.read()
+        log = "This is the log for the key '{}' : {}".format(Key, image)
+        gm.log(log)
 
         download_url = gm.uploadToS3(bucketName, fileName, image, mimetype)
         if download_url :
