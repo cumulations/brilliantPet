@@ -78,10 +78,14 @@ class imageUpload(APIView):
     def post(self, request):
 
         imageHandler = request.FILES.get('image_file')
+        print(dir(request))
 
+        gm.log("This is _stream: {}".format(request._stream.read()))
+        gm.log("This is load_stream: {}".format(request._load_stream()))
+        gm.log("This is _load_data_and_files: {}".format(request._load_data_and_files()))
         Key = list(request._files.keys())[0]
         log = "This is the log for the key '{}' : {}".format(Key, request._files.get(Key).read())
-        print(log)
+        # print(log)
         gm.log(log)
         gm.log(event = request.data)
 

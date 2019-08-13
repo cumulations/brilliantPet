@@ -236,21 +236,24 @@ class generalClass:
 
 
     def printEverythingOfObject(self, obj):
+        strng = ""
         for x in dir(obj):
             try:
                 atr = getattr(obj, x)
                 if type(atr) == types.FunctionType:
                     try:
-                        pp.pprint("result from method {} is {}".format(x, atr()))
+                        strng += "result from method {} is {}\n".format(x, atr())
                     except Exception as e:
-                        pp.pprint("exception for method {} is {}".format(x, e))
+                        strng += "exception for method {} is {}\n".format(x, e)
                 else:
                     try:
-                        pp.pprint("result from attribute {} is {}".format(x, atr))
+                        strng += "result from attribute {} is {}\n".format(x, atr)
                     except Exception as e:
-                        pp.pprint("exception for attribute {} is {}".format(x, e))
+                        strng += "exception for attribute {} is {}\n".format(x, e)
             except Exception as e:
-                print(e)
+                strng += traceback.format_exc()
+
+        return strng
 
 
 
