@@ -29,7 +29,7 @@ class userDevices(APIView):
         machines = []
         params = request.query_params
 
-        hasError = authenticate(params)
+        hasError = hasErrorAuthenticate(params)
         if hasError:
             return hasError
 
@@ -51,7 +51,7 @@ class userDevices(APIView):
 
         data = request.data
 
-        hasError = authenticate(data)
+        hasError = hasErrorAuthenticate(data)
         if hasError:
             return hasError
 
@@ -136,7 +136,7 @@ class usersView(APIView):
         params = request.query_params
         gm.log(params)
 
-        hasError = authenticate(params)
+        hasError = hasErrorAuthenticate(params)
         if hasError:
             return hasError
 
@@ -154,7 +154,7 @@ class usersView(APIView):
 
     def post(self, request):
         data = request.data
-        requiredParams = ["userid", "name", "notification_token", "rolls_count_at_home", "password", "email", "address"]
+        requiredParams = ["userid", "name", "notification_token", "rolls_count_at_home", "password", "email", "address", "shopify_access_token"]
         data = gm.cleanData(data)
         data["profile_image"] = ""
 
@@ -193,32 +193,30 @@ class usersView(APIView):
 
         # default profile image if upload failed
 
+        user = isUser(data)
 
-        if isUser(data):
-            return gm.clientError("User already exists.")
+        try:
+            user = register(data, user)
+            token = login(data, user)
+            details = {
+                "userid" : user.userid,
+                "name" : user.name,
+                "notification_token" : user.notificationToken,
+                "rolls_count_at_home" : user.rolls_count_at_home,
+                "email" : user.email,
+                "address" : user.address,
+                "profile_image" : user.profile_image,
+                "shopify_access_token" : user.shopify_access_token,
+                "login_token" : token
+            }
+            return gm.successResponse(details)
 
-        else:
-            try:
-                user = register(data)
-                token = login(data, user)
-                details = {
-                    "userid" : user.userid,
-                    "name" : user.name,
-                    "notification_token" : user.notification_token,
-                    "rolls_count_at_home" : user.rolls_count_at_home,
-                    "email" : user.email,
-                    "address" : user.address,
-                    "profile_image" : user.profile_image,
-                    "login_token" : token
-                }
-                return gm.successResponse(details)
+        except ValidationError as e:
+            return gm.errorResponse(str(e))
 
-            except ValidationError as e:
-                return gm.errorResponse(str(e))
-
-            except:
-                gm.errorLog(traceback.format_exc())
-                return gm.errorResponse("Error while adding user.")
+        except:
+            gm.errorLog(traceback.format_exc())
+            return gm.errorResponse("Error while adding user.")
 
 
 
@@ -239,7 +237,7 @@ class imageUploadMultipart(APIView):
 
         data = request.data
 
-        hasError = authenticate(data)
+        hasError = hasErrorAuthenticate(data)
         if hasError:
             return hasError
 
@@ -300,7 +298,7 @@ class userLogout(APIView):
     def post(self, request):
 
         data = request.data
-        hasError = authenticate(data)
+        hasError = hasErrorAuthenticate(data)
         if hasError:
             return hasError
 
@@ -321,7 +319,7 @@ class pets(APIView):
         pets = []
         params = request.query_params
 
-        hasError = authenticate(params)
+        hasError = hasErrorAuthenticate(params)
         if hasError:
             return hasError
 
@@ -347,7 +345,7 @@ class pets(APIView):
         requiredParams = [ "name", "breed", "birthday", "image_url", "weight", "weight_unit"]
         data = gm.cleanData(request.data)
 
-        hasError = authenticate(data)
+        hasError = hasErrorAuthenticate(data)
         if hasError:
             return hasError
 
@@ -393,7 +391,7 @@ class pets(APIView):
 
         data = gm.cleanData(request.data)
 
-        hasError = authenticate(data)
+        hasError = hasErrorAuthenticate(data)
         if hasError:
             return hasError
 
@@ -437,7 +435,7 @@ class pets(APIView):
 
         data = gm.cleanData(request.data)
 
-        hasError = authenticate(data)
+        hasError = hasErrorAuthenticate(data)
         if hasError:
             return hasError
 
@@ -472,7 +470,7 @@ class notificationUpdate(APIView):
         data = gm.cleanData(request.data)
         gm.log(data)
         gm.log(request.query_params)
-        hasError = authenticate(data)
+        hasError = hasErrorAuthenticate(data)
         if hasError:
             return hasError
 
@@ -499,7 +497,7 @@ class Event(APIView):
     def get(self, request):
 
         params = gm.cleanData(request.query_params)
-        hasError = authenticate(params)
+        hasError = hasErrorAuthenticate(params)
         if hasError:
             return hasError
 

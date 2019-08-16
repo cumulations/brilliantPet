@@ -36,6 +36,8 @@ class User(models.Model):
     rolls_count_at_home = models.IntegerField(blank=False, null=False)
     password = models.CharField(max_length = 512, null = False, blank = False)
     login_token = models.CharField(max_length=256, null = True, blank = True)
+    shopify_access_token = models.CharField(max_length=256, null = False, blank = False, default="shouldBeFilled")
+    notificationToken = models.CharField(max_length=200, null = False, blank = False, default = "toBeFilled")
     isDeleted = models.IntegerField(blank = False, null = False, default = 0)
 
 
