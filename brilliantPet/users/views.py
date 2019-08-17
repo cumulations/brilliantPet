@@ -129,6 +129,34 @@ class userDevices(APIView):
 
 
 
+    def delete(self, request):
+
+        data = gm.cleanData(request.data)
+
+        hasError = hasErrorAuthenticate(data)
+        if hasError:
+            return hasError
+
+        requiredParams = ["machine_id"]
+        emptyOrMissing = gm.getMissingEmptyParams(requiredParams, data)
+
+        if emptyOrMissing:
+            return emptyOrMissing
+        try:
+            machine = MachineDetails.objects.get(machine_id = data["machine_id"])
+            machine.isremoved = 1
+            machine.save()
+            return gm.successResponse("Successfully deleted mahine : {}".format(machine.machine_id))
+
+        except:
+            error = traceback.format_exc()
+            print(error)
+            gm.errorLog(error)
+            return gm.errorResponse("There was a problem while deleting the machine.")
+
+
+
+
 class usersView(APIView):
     bucketName = "brilliantpet.user-images"
 

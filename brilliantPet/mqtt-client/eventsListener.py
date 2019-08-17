@@ -60,13 +60,25 @@ def on_connect(client, userdata, flags, rc):
     log = log.format(flags, userdata, rc)
     gm.log(log, p)
 
+
+def storeDeviceInfo(message):
+
+    value = message["value"]["mark_count"]
+    framesize = message['value']['camera']["framesize"]
+    quality = message["value"]['camera']["quality"]
+
+    sql =
+
+
+
+
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
 
     # print(msg.topic+" "+str(msg.payload))
     device = msg.topic.split("/")[-2]
     print(device)
-    impEvents = ["PAD_ADVANCE_ACK", "LOOKIN", "ANIMAL_DETECTION"]
+    impEvents = ["PAD_ADVANCE_ACK", "LOOKIN", "ANIMAL_DETECTION", "DEVICE_INFO"]
     mes = msg.payload.decode('utf-8')
     mes = mes.replace("\n", "")
     payload = json.loads(mes)
@@ -101,6 +113,10 @@ def on_message(client, userdata, msg):
                 gm.log("{}\n{}\n{}".format(msg.topic, msg.payload, "Device didn't exist."), p)
                 print("device didn't exist")
                 return
+
+
+            if eventType == "DEVICE_INFO":
+                storeDeviceInfo(msg)
 
             sql = "select userid from users_user where userid like '{}' and isDeleted = 0;".format(query[0][0])
             cursor.execute(sql)

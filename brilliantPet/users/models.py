@@ -91,6 +91,16 @@ class notification_token(models.Model):
 
 
 
+class device_info(models.Model):
+
+    machine_id = models.ForeignKey(MachineDetails, on_delete=models.CASCADE, null = False, blank = False)
+
+    mark_count = models.IntegerField(null = False, blank = False, default = 0)
+    camera_framesize = models.IntegerField(null = False, blank = False)
+    quality = models.IntegerField(null = False, blank = False)
+
+
+
 
 
 

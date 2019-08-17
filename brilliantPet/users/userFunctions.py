@@ -108,7 +108,7 @@ def hasErrorAuthenticate(data):
     if not user:
         return gm.not_a_user()
 
-    return False
+    return False     # Doesn't check for login_token. Remove this for login_token check implementation
 
     if user.login_token == data["login_token"]:
         return False
