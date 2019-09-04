@@ -108,11 +108,18 @@ class generalClass:
 
         cleanedData = {}
         for param in data:
+            added = False
             if type(data[param]) == str:
+                added = True
                 cleanedData[param] = data[param].strip()
 
             if param == "email":
+                added = True
                 cleanedData[param] = data[param].lower()
+
+            if not added:
+                cleanedData[param] = data[param]
+
 
         return cleanedData
 
