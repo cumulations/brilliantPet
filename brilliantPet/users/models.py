@@ -39,6 +39,7 @@ class User(models.Model):
     shopify_access_token = models.CharField(max_length=256, null = False, blank = False, default="shouldBeFilled")
     notificationToken = models.CharField(max_length=200, null = False, blank = False, default = "toBeFilled")
     isDeleted = models.IntegerField(blank = False, null = False, default = 0)
+    user_type = models.CharField(max_length = 25, null = False, default = "user")
 
 
 
