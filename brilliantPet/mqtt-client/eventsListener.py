@@ -61,13 +61,13 @@ def on_connect(client, userdata, flags, rc):
     gm.log(log, p)
 
 
-def storeDeviceInfo(message):
-
-    value = message["value"]["mark_count"]
-    framesize = message['value']['camera']["framesize"]
-    quality = message["value"]['camera']["quality"]
-
-    sql =
+# def storeDeviceInfo(message):
+#
+#     value = message["value"]["mark_count"]
+#     framesize = message['value']['camera']["framesize"]
+#     quality = message["value"]['camera']["quality"]
+#
+#     sql = ""
 
 
 
@@ -115,8 +115,8 @@ def on_message(client, userdata, msg):
                 return
 
 
-            if eventType == "DEVICE_INFO":
-                storeDeviceInfo(msg)
+            # if eventType == "DEVICE_INFO":
+            #     storeDeviceInfo(msg)
 
             sql = "select userid from users_user where userid like '{}' and isDeleted = 0;".format(query[0][0])
             cursor.execute(sql)
