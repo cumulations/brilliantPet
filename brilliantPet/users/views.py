@@ -34,13 +34,18 @@ class userDevices(APIView):
             return hasError
 
         else:
-            userMachines = MachineDetails.objects.filter(userid = params["userid"], isremoved = 0)
+            user = getUser(params)
+            if user.user_type.lower() in ["admin", "customer_support"]:
+                userMachines = MachineDetails.objects.filter(isremoved = 0)
+            else:
+                userMachines = MachineDetails.objects.filter(userid = params["userid"], isremoved = 0)
             for m in userMachines:
                 machine = {
                     "machine_id" : m.machine_id,
                     "mode" : m.mode,
                     "name" : m.name,
-                    "status" : m.status
+                    "status" : m.status,
+                    "userid" : m.userid_id
                 }
                 machines.append(machine)
 
@@ -353,7 +358,12 @@ class pets(APIView):
 
 
         else:
-            userPets = Pets.objects.filter(userid=params["userid"], is_deleted = 0)
+            user = getUser(params)
+            if user.user_type.lower() in ["admin", "customer_support"]:
+                userPets = Pets.objects.filter(is_deleted = 0)
+            else:
+                userPets = Pets.objects.filter(userid=params["userid"], is_deleted = 0)
+
             for m in userPets:
                 pet = {
                     "petid": m.petid,
@@ -362,7 +372,8 @@ class pets(APIView):
                     "weight": m.weight,
                     "weight_unit" : m.weight_unit,
                     "image_url" : m.image_url,
-                    "birthday" : m.birthday
+                    "birthday" : m.birthday,
+                    "userid" : m.userid_id
                 }
                 pets.append(pet)
 
@@ -539,8 +550,13 @@ class Event(APIView):
         endDate = params["endDate"]
 
         try:
+            user = getUser(params)
+            if user.user_type.lower() in ["admin", "customer_support"]:
+                ev = events.objects.filter(date__range = (startDate, endDate), machine_id = params["machine_id"]).order_by("-date")
+            else:
+                ev = events.objects.filter(date__range = (startDate, endDate), machine_id = params["machine_id"], userid = params["userid"]).order_by("-date")
 
-            ev = events.objects.filter(date__range = (startDate, endDate), machine_id = params["machine_id"], userid = params["userid"]).order_by("-date")
+
             retSet = []
 
             for item in ev:
