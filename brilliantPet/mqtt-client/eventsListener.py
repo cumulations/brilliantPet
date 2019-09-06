@@ -8,7 +8,8 @@ from pyfcm import FCMNotification
 
 # sysPath = "../"
 sysPath = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/../"
-sys.path.append("/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/../")
+# sys.path.append("/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/../")
+sys.path.append(sysPath)
 
 from brilliantPet.generalMethods import generalClass
 p = "/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/mqtt-client/logs"
@@ -39,6 +40,8 @@ def fcmPush(registration_id, message_title, data_message = None, message_body = 
 
 
 
+# def executeSql(sql, con):
+
 
 
 
@@ -49,7 +52,11 @@ def on_connect(client, userdata, flags, rc):
 
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
-    client.subscribe("/bp/+/event")
+
+    mqttTopics = [("/bp/+/event", 0), ("$aws/events/presence/disconnected/+", 0), ("$aws/events/presence/connected/+", 0)]
+    client.subscribe(mqttTopics)
+
+    # client.subscribe(("/bp/+/event"), ("aws/events/presence/disconnected/+"))
 
     log = """
     MQTT client connected. \n
@@ -71,19 +78,20 @@ def on_connect(client, userdata, flags, rc):
 
 
 
-
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
 
     # print(msg.topic+" "+str(msg.payload))
-    device = msg.topic.split("/")[-2]
+    print(msg.topic)
+    topic = msg.topic.split("/")
+    conStatus = topic[-2].lower() in ["connected", "disconnected"]
+    device = topic[-1] if conStatus else topic[-2]
     print(device)
-    impEvents = ["PAD_ADVANCE_ACK", "LOOKIN", "ANIMAL_DETECTION", "DEVICE_INFO"]
+    impEvents = ["PAD_ADVANCE_ACK", "LOOKIN", "ANIMAL_DETECTION", "DEVICE_INFO", "conStatus"]
     mes = msg.payload.decode('utf-8')
     mes = mes.replace("\n", "")
     payload = json.loads(mes)
-    eventType = str(payload["type"])
-
+    eventType = "conStatus" if conStatus else str(payload["type"])
     if eventType not in impEvents:
         log = "{}\n{}\nmessage received but not saved.".format(msg.topic, msg.payload)
         print(log)
@@ -126,6 +134,17 @@ def on_message(client, userdata, msg):
                 gm.log("{}\n{}\n{}".format(msg.topic, msg.payload, "User doesn't exist or is deleted."), p)
                 print("user doesn't exit or is deleted.")
                 return
+
+            if conStatus:
+                status = 0 if topic[-2].lower() == "disconnected" else 1
+                sql = "update users_machinedetails set status = {} where machine_id like '{}';".format(status, device)
+                cursor.execute(sql)
+                con.commit()
+                gm.log("{}\n{}\nStatus updated successfully to {} for device {}.".format(msg.topic, msg.payload, status, device), p)
+                print("Status updated successfully.")
+                return
+
+
 
             #saving the payload to the db after validated
             print("message received : ", payload)
