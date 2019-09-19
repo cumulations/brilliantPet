@@ -191,6 +191,9 @@ class usersView(APIView):
         data = gm.cleanData(data)
         data["profile_image"] = ""
 
+        if data["notification_token"] in ["", " ", None, False]:
+            data["notification_token"] = "default_Notification_token"
+
         missingParams = gm.missingParams(requiredParams, data)
         if missingParams:
             missingParams = ", ".join(missingParams)
@@ -248,7 +251,8 @@ class usersView(APIView):
             return gm.errorResponse(str(e))
 
         except:
-            gm.errorLog(traceback.format_exc())
+            gm.errorLog("Data : {}\nError : {}".format(data, traceback.format_exc()))
+
             return gm.errorResponse("Error while adding user.")
 
 
