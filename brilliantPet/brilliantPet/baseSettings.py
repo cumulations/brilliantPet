@@ -133,7 +133,7 @@ LOGGING = {
           'file': {
               'level': 'DEBUG',
               'class': 'logging.FileHandler',
-              'filename': './logs/' + fileName,
+              'filename': '/home/ubuntu/brilliantPet/brilliantPet/brilliantPet/brilliantPet/logs/' + fileName,
           },
       },
       'loggers': {
