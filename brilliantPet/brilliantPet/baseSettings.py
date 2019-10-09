@@ -161,4 +161,6 @@ LOGGING = {
 #     },
 # }
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
+
 STATIC_URL = '/static/'
