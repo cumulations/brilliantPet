@@ -1,7 +1,7 @@
 from django.shortcuts import render
 import json
 import traceback
-from .models import MachineDetails, User, Pets
+from .models import MachineDetails, User, Pets, petDefaultImage
 from django.core.exceptions import *
 from rest_framework.views import APIView
 from django.db import IntegrityError
@@ -407,13 +407,16 @@ class pets(APIView):
         user = getUser(data)
 
         try:
+            if data["image_url"] not in ["", None]:
+                imageUrl = data["image_url"]
+            else:
+                imageUrl = petDefaultImage
+
             pet = user.pets_set.create(name = data["name"],\
                        breed = data["breed"], birthday = data["birthday"],\
                        weight = data["weight"],\
-                       weight_unit = data["weight_unit"])
+                       weight_unit = data["weight_unit"], image_url = imageUrl)
 
-            if data["image_url"] not in ["", None]:
-                pet["image_url"] = data["image_url"]
             pet.save()
 
         except Exception as e:
