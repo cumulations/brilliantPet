@@ -598,7 +598,7 @@ class LastEventOfTheMachine(APIView):
         if emptyOrMissing:
             return emptyOrMissing
 
-        impEvents = [ "LOOKIN", "ANIMAL_DETECTION", "conStatus"]
+        impEvents = [ "LOOKIN", "ANIMAL_DETECTION"]
 
         try:
             user = getUser(params)

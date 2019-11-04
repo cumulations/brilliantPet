@@ -87,7 +87,7 @@ def on_message(client, userdata, msg):
     conStatus = topic[-2].lower() in ["connected", "disconnected"]
     device = topic[-1] if conStatus else topic[-2]
     print(device)
-    impEvents = ["PAD_ADVANCE_ACK", "LOOKIN", "ANIMAL_DETECTION", "conStatus"]
+    impEvents = ["PAD_ADVANCE_ACK","PAD_ADVANCE", "LOOKIN", "ANIMAL_DETECTION", "DEVICE_ERROR","conStatus"]
     mes = msg.payload.decode('utf-8')
     mes = mes.replace("\n", "")
     payload = json.loads(mes)
