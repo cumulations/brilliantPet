@@ -583,6 +583,51 @@ class Event(APIView):
             return gm.errorResponse("There was some error generating response")
 
 
+class LastEventOfTheMachine(APIView):
+
+     def get(self, request):
+
+        params = gm.cleanData(request.query_params)
+        hasError = hasErrorAuthenticate(params)
+        if hasError:
+            return hasError
+
+        requiredParams = ["userid", "machine_id"]
+        emptyOrMissing = gm.getMissingEmptyParams(requiredParams, params)
+
+        if emptyOrMissing:
+            return emptyOrMissing
+
+        impEvents = [ "LOOKIN", "ANIMAL_DETECTION","ANIMAL_DETECTION", "conStatus"]
+
+        try:
+            user = getUser(params)
+            if user.user_type.lower() in ["admin", "customer_support"]:
+                ev = events.objects.filter (type__in=impEvents, machine_id = params["machine_id"], userid = params["userid"]).order_by("-date")[:1] 
+            else:
+                ev = events.objects.filter (type__in=impEvents, machine_id = params["machine_id"], userid = params["userid"]).order_by("-date")[:1] 
+
+
+            retSet = []
+
+            for item in ev:
+                retSet.append({
+                "eventid" : item.eventid,
+                "date" : item.date,
+                "value" : item.value,
+                "type" : item.type
+            })
+
+
+            return gm.successResponse(retSet)
+
+        except:
+            traceback.print_exc()
+            gm.errorLog(traceback.format_exc())
+            return gm.errorResponse("There was some error generating response")
+
+
+
 
 
 
