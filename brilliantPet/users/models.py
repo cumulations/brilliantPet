@@ -69,6 +69,9 @@ class events(models.Model):
     value = models.TextField(null = False, blank = False)
     machine_id = models.ForeignKey(MachineDetails, on_delete=models.CASCADE, null= False, blank = False)
     userid = models.ForeignKey(User, on_delete=models.CASCADE, null = False, blank = False)
+    isflagged = models.BooleanField(null = False, blank = False , default = False)
+    tags    = models.TextField(null = False, blank = False , default="")
+    note    = models.TextField(null = False, blank = False, default="")
 
     # def __str__(self):
     #

@@ -11,6 +11,7 @@ import boto3
 import base64
 import time
 from .userFunctions import *
+from .eventFunctions import *
 
 gm = generalClass()
 
@@ -582,6 +583,49 @@ class Event(APIView):
             gm.errorLog(traceback.format_exc())
             return gm.errorResponse("There was some error generating response")
 
+    def post(self, request):
+
+        data = gm.cleanData(request.data)
+
+        hasError = hasErrorAuthenticate(data)
+        if hasError:
+            return hasError
+
+        requiredParams = ["eventid"]
+        missingParams = gm.missingParams(requiredParams, data)
+        if missingParams:
+            missingParams = ", ".join(missingParams)
+            return gm.clientError(missingParamMessage.format(missingParams))
+
+        item = getEvent(data)
+        retSet=[]
+        if not item:
+            return gm.clientError("Invalid event id")
+        try:
+            item=updateEvent(data,item.eventid)
+            if item:
+                retSet.append({
+                    "eventid" : item.eventid,
+                    "date" : item.date,
+                    "value" : item.value,
+                    "type" : item.type,
+                    "isflagged":item.isflagged,
+                    "note":item.note,
+                    "tags":item.tags
+
+                    })
+
+                return gm.successResponse(retSet)
+            else:
+                return gm.errorResponse("something went wrong")
+
+
+        except:
+            traceback.print_exc()
+            gm.errorLog(traceback.format_exc())
+            return gm.errorResponse("There was some error while making changes. Try again later.")
+
+
 
 class LastEventOfTheMachine(APIView):
 
@@ -615,10 +659,12 @@ class LastEventOfTheMachine(APIView):
                 "eventid" : item.eventid,
                 "date" : item.date,
                 "value" : item.value,
-                "type" : item.type
-            })
-
-
+                "type" : item.type,
+                "isflagged":item.isflagged,
+                "note":item.note,
+                "tags":item.tags,
+                })
+       
             return gm.successResponse(retSet)
 
         except:
