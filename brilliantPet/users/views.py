@@ -616,7 +616,10 @@ class Event(APIView):
                 "eventid" : item.eventid,
                 "date" : item.date,
                 "value" : item.value,
-                "type" : item.type
+                "type" : item.type,
+                "isflagged":item.isflagged,
+                "note":item.note,
+                "tags":item.tags,
             })
 
 
