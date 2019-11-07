@@ -23,6 +23,8 @@ class MachineDetails(models.Model):
     isremoved = models.IntegerField(blank=False, null=False)
     status = models.IntegerField(blank=False, null=False, default = 1)
     user_role = models.CharField(max_length=25, blank=False, null=False)
+    machine_size= models.CharField(max_length=25, blank=False, null=False,default="standard")
+    roll_length= models.CharField(max_length=25, blank=False, null=False,default="standard")
 
 
 
