@@ -11,6 +11,12 @@ import boto3
 import base64
 import time
 from .userFunctions import *
+from .eventFunctions import *
+from .machineFunctions import *
+from django.core import serializers
+import django.http
+
+
 
 gm = generalClass()
 
@@ -45,7 +51,13 @@ class userDevices(APIView):
                     "mode" : m.mode,
                     "name" : m.name,
                     "status" : m.status,
-                    "userid" : m.userid_id
+                    "userid" : m.userid_id,
+                    "machine_size":m.machine_size,
+                    "roll_length":m.roll_length,
+                    "firmware":m.firmware,
+                    "network":m.network
+                    
+
                 }
                 machines.append(machine)
 
@@ -86,7 +98,9 @@ class userDevices(APIView):
             "firmware" : "",
             "network" : "",
             "isremoved" : 0,
-            "user_role" : "owner"
+            "user_role" : "owner",
+            "machine_size":"standard",
+            "roll_length":"standard",
         }
 
         for default in defaultParams.keys():
@@ -98,6 +112,15 @@ class userDevices(APIView):
         network = defaultParams["network"]
         isRemoved = defaultParams["isremoved"]
         user_role = defaultParams['user_role']
+        machine_size =defaultParams['machine_size']
+        roll_length=defaultParams['roll_length']
+
+        if machine_size == None or validateMachineSize(machine_size)==False:
+            machine_size="standard"
+
+        if roll_length  == None  or validateRollLength(roll_length)==False:
+           roll_length="standard"
+
 
         user = getUser(data)
 
@@ -119,9 +142,31 @@ class userDevices(APIView):
             machine.isremoved = isRemoved
             machine.user_role = user_role
 
+            if machine_size != None and validateMachineSize(machine_size):
+                machine.machine_size=machine_size.lower()
+
+
+            if roll_length != None and validateRollLength(roll_length):
+                machine.roll_length=roll_length.lower()
+
             machine.save()
 
-            return gm.successResponse(data)
+            # serialized_obj = serializers.serialize('json', [ machine, ])
+            # return gm.successResponse(serialized_obj)
+            m=machine
+            machineres = {
+                "machine_id" : m.machine_id,
+                "mode" : m.mode,
+                "name" : m.name,
+                "status" : m.status,
+                "userid" : m.userid_id,
+                "machine_size":m.machine_size,
+                "roll_length":m.roll_length,
+                "firmware":m.firmware,
+                "network":m.network
+            }
+            return gm.successResponse(machineres)
+
 
 
         except Exception as e:
@@ -571,7 +616,10 @@ class Event(APIView):
                 "eventid" : item.eventid,
                 "date" : item.date,
                 "value" : item.value,
-                "type" : item.type
+                "type" : item.type,
+                "isflagged":item.isflagged,
+                "note":item.note,
+                "tags":item.tags,
             })
 
 
@@ -581,6 +629,48 @@ class Event(APIView):
             traceback.print_exc()
             gm.errorLog(traceback.format_exc())
             return gm.errorResponse("There was some error generating response")
+
+    def post(self, request):
+
+        data = gm.cleanData(request.data)
+
+        hasError = hasErrorAuthenticate(data)
+        if hasError:
+            return hasError
+
+        requiredParams = ["eventid"]
+        missingParams = gm.missingParams(requiredParams, data)
+        if missingParams:
+            missingParams = ", ".join(missingParams)
+            return gm.clientError(missingParamMessage.format(missingParams))
+
+        item = getEvent(data)
+        retSet=[]
+        if not item:
+            return gm.clientError("Invalid event id")
+        try:
+            item=updateEvent(data,item.eventid)
+            if item:
+                retSet.append({
+                    "eventid" : item.eventid,
+                    "date" : item.date,
+                    "value" : item.value,
+                    "type" : item.type,
+                    "isflagged":item.isflagged,
+                    "note":item.note,
+                    "tags":item.tags
+
+                    })
+
+                return gm.successResponse(retSet)
+            else:
+                return gm.errorResponse("something went wrong")
+
+
+        except:
+            traceback.print_exc()
+            gm.errorLog(traceback.format_exc())
+            return gm.errorResponse("There was some error while making changes. Try again later.")
 
 
 class LastEventOfTheMachine(APIView):
@@ -598,7 +688,7 @@ class LastEventOfTheMachine(APIView):
         if emptyOrMissing:
             return emptyOrMissing
 
-        impEvents = [ "LOOKIN", "ANIMAL_DETECTION", "conStatus"]
+        impEvents = [ "LOOKIN", "ANIMAL_DETECTION"]
 
         try:
             user = getUser(params)
@@ -615,10 +705,12 @@ class LastEventOfTheMachine(APIView):
                 "eventid" : item.eventid,
                 "date" : item.date,
                 "value" : item.value,
-                "type" : item.type
-            })
-
-
+                "type" : item.type,
+                "isflagged":item.isflagged,
+                "note":item.note,
+                "tags":item.tags,
+                })
+       
             return gm.successResponse(retSet)
 
         except:
