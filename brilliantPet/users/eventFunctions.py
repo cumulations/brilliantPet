@@ -2,6 +2,10 @@ from brilliantPet.generalMethods import generalClass
 from django.core.exceptions import *
 from .models import *
 import traceback
+from django.utils import timezone
+from datetime import datetime, timedelta 
+
+
 
 gm = generalClass()
 
@@ -19,6 +23,30 @@ def getEvent(data):
         gm.errorLog(traceback.format_exc())
         return None
 
+"""
+this function gets you the event for a given timestamp and size
+"""
+
+def getEventByTimestampAndSize(data):
+    data = gm.cleanData(data)
+    ihour=-10
+
+    try:
+        if "machine_id" in data and data["machine_id"] not in ["", None]:
+            if "timestamp" in data and data["timestamp"] not in ["", None]:
+                if "imagesize" in data and data["imagesize"] not in ["", None]:
+                    event = events.objects.filter(
+                                type=data["type"],
+                                machine_id=data["machine_id"],
+                                date__gt=(timezone.now()+timedelta(hours=ihour)),
+                                value__contains="\"ts\": "+data["timestamp"]
+                            )
+                    return event[0]
+        return None
+    except:
+        traceback.print_exc()
+        gm.errorLog(traceback.format_exc())
+        return None
 
 def updateEvent(data,eventid):
         data = gm.cleanData(data)
