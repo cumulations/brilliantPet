@@ -673,6 +673,11 @@ class Event(APIView):
             return gm.errorResponse("There was some error while making changes. Try again later.")
 
 
+"""
+This class will help us get the lastevent of a machine
+only lookin, animal detection are taken
+"""
+
 class LastEventOfTheMachine(APIView):
 
      def get(self, request):
@@ -719,7 +724,54 @@ class LastEventOfTheMachine(APIView):
             return gm.errorResponse("There was some error generating response")
 
 
+"""
+This class will help us flag and update an event without the mqtt
+TODO add the image size
 
+"""
+class  MqttEvent(APIView):
+
+    def post(self, request):
+
+        data = gm.cleanData(request.data)
+
+        hasError = hasErrorAuthenticate(data)
+        if hasError:
+            return hasError
+
+        requiredParams = ["timestamp","imagesize","type","machine_id","userid"]
+        missingParams = gm.missingParams(requiredParams, data)
+        if missingParams:
+            missingParams = ", ".join(missingParams)
+            return gm.clientError(missingParamMessage.format(missingParams))
+
+        item = getEventByTimestampAndSize(data)
+        retSet=[]
+        if not item:
+            return gm.clientError("Invalid event")
+        try:
+            item=updateEvent(data,item.eventid)
+            if item:
+                retSet.append({
+                    "eventid" : item.eventid,
+                    "date" : item.date,
+                    "value" : item.value,
+                    "type" : item.type,
+                    "isflagged":item.isflagged,
+                    "note":item.note,
+                    "tags":item.tags
+
+                    })
+
+                return gm.successResponse(retSet)
+            else:
+                return gm.errorResponse("something went wrong")
+
+
+        except:
+            traceback.print_exc()
+            gm.errorLog(traceback.format_exc())
+            return gm.errorResponse("There was some error while making changes. Try again later.")
 
 
 
