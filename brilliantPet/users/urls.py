@@ -13,7 +13,9 @@ urlpatterns = [
     url(r"^logout$", userLogout.as_view()),
     url(r"^tokenupdate$", notificationUpdate.as_view()),
     url(r"^events$", Event.as_view()),
-    url(r"^lastevent$", LastEventOfTheMachine.as_view())
+    url(r"^lastevent$", LastEventOfTheMachine.as_view()),
+    url(r"^mqttevent$", MqttEvent.as_view())
+    
 
 
 
