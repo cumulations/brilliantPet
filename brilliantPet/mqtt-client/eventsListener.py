@@ -148,8 +148,8 @@ def on_message(client, userdata, msg):
 
             #saving the payload to the db after validated
             print("message received : ", payload)
-            sql = "insert into users_events (type, value, machine_id_id, userid_id, date, isflagged, tags, note) values ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')"
-            sql = sql.format(eventType, json.dumps(payload), query[0][1], query[0][0], datetime.now(), 0, '', '')
+            sql = "insert into users_events (type, value, machine_id_id, userid_id, date, isflagged, tags, note, tags_value) values ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')"
+            sql = sql.format(eventType, json.dumps(payload), query[0][1], query[0][0], datetime.now(), 0, '', '', 1)
             cursor.execute(sql)
             con.commit()
             gm.log("{}\n{}\nmessage successfully saved.".format(msg.topic, msg.payload), p)
