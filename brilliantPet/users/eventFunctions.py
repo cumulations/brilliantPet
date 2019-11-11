@@ -44,7 +44,7 @@ def getEventByTimestampAndSize(data):
                                 type=data["type"],
                                 machine_id=data["machine_id"],
                                 date__gt=(timezone.now()+timedelta(hours=ihour)),
-                                value__contains="\"ts\": "+data["timestamp"]
+                                value__contains="\"ts\": "+str(data["timestamp"]).strip()
                             )
                     return event[0]
         return None
