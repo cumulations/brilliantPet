@@ -74,6 +74,7 @@ class events(models.Model):
     isflagged = models.BooleanField(null = False, blank = False , default = False)
     tags    = models.TextField(null = False, blank = False , default="")
     note    = models.TextField(null = False, blank = False, default="")
+    tag_value= models.IntegerField(default=1, blank=True, null=True)
 
     # def __str__(self):
     #

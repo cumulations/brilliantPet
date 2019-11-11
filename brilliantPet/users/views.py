@@ -585,6 +585,7 @@ class notificationUpdate(APIView):
 
 class Event(APIView):
 
+
     def get(self, request):
 
         params = gm.cleanData(request.query_params)
@@ -724,6 +725,72 @@ class LastEventOfTheMachine(APIView):
             return gm.errorResponse("There was some error generating response")
 
 
+"""
+This class will help us to get the filte th events based on the provided params
+"""
+class FilterEvent(APIView):
+
+    
+    def get(self, request):
+
+        params = gm.cleanData(request.query_params)
+        hasError = hasErrorAuthenticate(params)
+        if hasError:
+            return hasError
+
+        requiredParams = ["userid","startDate", "endDate"]
+        emptyOrMissing = gm.getMissingEmptyParams(requiredParams, params)
+
+        if emptyOrMissing:
+            return emptyOrMissing
+
+        startDate = params["startDate"]
+        endDate = params["endDate"]
+
+        mlist=params.get("mlist")
+        if mlist!= None:
+            mlist=mlist.strip()
+            mlist= list(mlist.split(",")) 
+
+        typelist=params.get("typelist")
+        
+        if typelist!= None:
+            typelist=typelist.strip()
+            typelist= list(typelist.split(",")) 
+            
+        flagslist=params.get("flags")
+        
+        if flagslist!= None:
+            flagslist=flagslist.strip()
+            flagslist= list(flagslist.split(",")) 
+
+        if validateEventTypeFalgLists(mlist,typelist,flagslist)== False:
+            return gm.errorResponse("Invalid attribute in machine list, type list or in flags")
+
+        retSet = []
+        try:
+            
+            ev=fileterEventsByMachines(params["userid"],startDate,endDate,mlist,typelist,flagslist)
+
+            if ev is not None:
+
+                for item in ev:
+                    retSet.append({
+                    "eventid" : item.eventid,
+                    "date" : item.date,
+                    "value" : item.value,
+                    "type" : item.type,
+                    "isflagged":item.isflagged,
+                    "note":item.note,
+                    "tags":item.tags,
+                })
+
+                return gm.successResponse(retSet)
+
+        except:
+            traceback.print_exc()
+            gm.errorLog(traceback.format_exc())
+            return gm.errorResponse("There was some error generating response")
 """
 This class will help us flag and update an event without the mqtt
 TODO add the image size
