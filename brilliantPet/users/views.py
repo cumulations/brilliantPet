@@ -842,6 +842,35 @@ class  MqttEvent(APIView):
 
 
 
+class  GraphEventCount(APIView):
+
+    def get(self, request):
+
+        params = gm.cleanData(request.query_params)
+        hasError = hasErrorAuthenticate(params)
+        if hasError:
+            return hasError
+
+        requiredParams = ["type"]
+        emptyOrMissing = gm.getMissingEmptyParams(requiredParams, params)
+
+        if emptyOrMissing:
+            return emptyOrMissing
+
+        ev = getTheMonthlyEventsCountBasedOnType(params["type"])
+        if ev is not None:
+                retSet=[]
+                for item in ev:
+                    retSet.append({
+                    "event_date":item.event_date,
+                    "event_count" : item.event_count
+                })
+
+                return gm.successResponse(retSet)
+        
+
+
+
 
 
 

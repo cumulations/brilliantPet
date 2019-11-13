@@ -15,7 +15,9 @@ urlpatterns = [
     url(r"^events$", Event.as_view()),
     url(r"^lastevent$", LastEventOfTheMachine.as_view()),
     url(r"^filterevent$", FilterEvent.as_view()),
+    url(r"^monthyevent$", GraphEventCount.as_view()),
     url(r"^mqttevent$", MqttEvent.as_view())
+    
 
 
     

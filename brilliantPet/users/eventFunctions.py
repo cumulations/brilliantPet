@@ -92,6 +92,7 @@ def updateEvent(data,eventid):
                     print("invalid tag")
                     return None
 
+    
                 event.save()
 
             return event
@@ -191,4 +192,19 @@ def validateEventTypeFalgLists(machinelist,typelist,flagslist):
             traceback.print_exc()
             gm.errorLog(traceback.format_exc())
             return None
+
+
+def getTheMonthlyEventsCountBasedOnType(evtype):
+
+    try:
+        resultset = events.objects.raw('''Select 1 as eventid, Date(`date`) as event_date, count(eventid) as event_count from users_events
+        where type = 'ANIMAL_DETECTION' and  `date` > Date(DATE_SUB(now(),interval 24 MONTH)) 
+                                    group by Date(`date`)''')
+        return resultset
+
+    except:
+            traceback.print_exc()
+            gm.errorLog(traceback.format_exc())
+            return None     
+
 
