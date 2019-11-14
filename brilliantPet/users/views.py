@@ -699,7 +699,7 @@ class LastEventOfTheMachine(APIView):
         try:
             user = getUser(params)
             if user.user_type.lower() in ["admin", "customer_support"]:
-                ev = events.objects.filter (type__in=impEvents, machine_id = params["machine_id"], userid = params["userid"]).order_by("-date")[:1] 
+                ev = events.objects.filter (type__in=impEvents, machine_id = params["machine_id"]).order_by("-date")[:1]
             else:
                 ev = events.objects.filter (type__in=impEvents, machine_id = params["machine_id"], userid = params["userid"]).order_by("-date")[:1] 
 
