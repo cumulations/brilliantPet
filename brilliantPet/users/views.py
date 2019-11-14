@@ -738,7 +738,7 @@ class FilterEvent(APIView):
         if hasError:
             return hasError
 
-        requiredParams = ["userid","startDate", "endDate"]
+        requiredParams = ["userid","startDate", "endDate", ]
         emptyOrMissing = gm.getMissingEmptyParams(requiredParams, params)
 
         if emptyOrMissing:
@@ -746,6 +746,8 @@ class FilterEvent(APIView):
 
         startDate = params["startDate"]
         endDate = params["endDate"]
+
+        isFlagged=params.get("isFlagged")
 
         mlist=params.get("mlist")
         if mlist!= None:
@@ -770,7 +772,7 @@ class FilterEvent(APIView):
         retSet = []
         try:
             
-            ev=fileterEventsByMachines(params["userid"],startDate,endDate,mlist,typelist,flagslist)
+            ev=fileterEventsByMachines(params["userid"],startDate,endDate,mlist,typelist,flagslist,isFlagged)
 
             if ev is not None:
 
@@ -851,13 +853,13 @@ class  GraphEventCount(APIView):
         if hasError:
             return hasError
 
-        requiredParams = ["type"]
+        requiredParams = ["type","machineid"]
         emptyOrMissing = gm.getMissingEmptyParams(requiredParams, params)
 
         if emptyOrMissing:
             return emptyOrMissing
 
-        ev = getTheMonthlyEventsCountBasedOnType(params["type"])
+        ev = getTheMonthlyEventsCountBasedOnType(params["type"],params["machineid"])
         if ev is not None:
                 retSet=[]
                 for item in ev:
