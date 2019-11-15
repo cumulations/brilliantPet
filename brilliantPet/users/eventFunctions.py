@@ -5,6 +5,8 @@ import traceback
 from django.utils import timezone
 from datetime import datetime, timedelta 
 from django.db.models import  F
+from .userFunctions import *
+
 
 
 mainFlagDictionary={"pee":2,"poop":3,"dog":5,"error":7,"healthissue":11}
@@ -148,7 +150,14 @@ def fileterEventsByMachines(userid,startDate,endDate,machinelist,typelist,flagsl
         if the machines are not sent then the all the machines under the user would be selected
         """
         if machinelist is None or len(machinelist) < 1:
-            userMachines = MachineDetails.objects.filter(userid = myuserid, isremoved = 0)
+            user = getUser({"userid":myuserid})
+
+            if user.user_type.lower() in ["admin", "customer_support"]:
+                userMachines = MachineDetails.objects.filter(isremoved = 0)
+            
+            else:
+                userMachines = MachineDetails.objects.filter(userid = myuserid, isremoved = 0)
+            
             machinelist=[]
 
             for m in userMachines:
@@ -160,7 +169,7 @@ def fileterEventsByMachines(userid,startDate,endDate,machinelist,typelist,flagsl
 
             print("the value of flag is "+str(flagv))
             event = events.objects.all().annotate(
-                    delta=F('tag_value')%flagv).filter(userid = userid,
+                    delta=F('tag_value')%flagv).filter(
                     type__in=typelist,
                     machine_id__in=machinelist,
                     isflagged=isFlagged,
@@ -169,7 +178,7 @@ def fileterEventsByMachines(userid,startDate,endDate,machinelist,typelist,flagsl
             
         elif flagv <= 0 and isFlagged!=None and isFlagged:
             print("the value of flag is "+str(flagv))
-            event = events.objects.filter(userid = userid,
+            event = events.objects.filter(
                         type__in=typelist,
                         isflagged=isFlagged,
                         date__range = (startDate, endDate),
@@ -178,7 +187,7 @@ def fileterEventsByMachines(userid,startDate,endDate,machinelist,typelist,flagsl
         elif flagv > 0:
             print("the value of flag is "+str(flagv))
             event = events.objects.all().annotate(
-                    delta=F('tag_value')%flagv).filter(userid = userid,
+                    delta=F('tag_value')%flagv).filter(
                     type__in=typelist,
                     machine_id__in=machinelist,
                     delta=0,
@@ -186,7 +195,7 @@ def fileterEventsByMachines(userid,startDate,endDate,machinelist,typelist,flagsl
                
         else: 
             print("the value of flag is "+str(flagv))
-            event = events.objects.filter(userid = userid,
+            event = events.objects.filter(
                         type__in=typelist,
                         date__range = (startDate, endDate),
                         machine_id__in=machinelist).order_by("-date")
