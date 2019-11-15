@@ -34,7 +34,7 @@ this function gets you the event for a given timestamp and size
 
 def getEventByTimestampAndSize(data):
     data = gm.cleanData(data)
-    ihour=-24000
+    ihour=-10
 
     try:
         if "machine_id" in data and data["machine_id"] not in ["", None]:
@@ -68,13 +68,11 @@ def updateEvent(data,eventid):
             if isflageged:
                 event.isflagged = isflageged
             else:
-                print("is flagged is empty")
                 event.isflagged=False
 
             if note:                   
                 event.note = note
             else:
-                print("notes are empty")
                 event.note=""                
 
             if tags:
@@ -104,13 +102,11 @@ def updateEvent(data,eventid):
                             flagv=flagv * mainFlagDictionary.get(flagvalue)
 
                     event.tag_value=flagv
-                    print("saving the tag value as "+str(flagv))
                 else:
                     print("invalid tag")
                     return None
 
             else:
-                print("tags are empty")
                 event.tags=""
                 event.tag_value=1
     
