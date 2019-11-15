@@ -67,15 +67,22 @@ def updateEvent(data,eventid):
 
             if isflageged:
                 event.isflagged = isflageged
+            else:
+                event.isflagged=False
 
             if note:                   
                 event.note = note
+            else:
+                event.note=""                
 
             if tags:
                 mainlist=["poop","pee","dog","error","healthissue"]
                 tagslist=tags.strip(",").split(",")
                 tagslist=set(tagslist)
                 le = len([x for x in tagslist if x.lower().strip() not in mainlist])
+
+
+
                 # toBeAdded = []
                 # discarded = []
                 # for x in tagslist:
@@ -88,12 +95,23 @@ def updateEvent(data,eventid):
 
                 if le == 0:
                     event.tags = ",".join(set(tagslist))
+
+                    flagv=1    
+                    for flagvalue in tagslist:
+                        if len(flagvalue.strip()) > 0:
+                            flagv=flagv * mainFlagDictionary.get(flagvalue)
+
+                    event.tag_value=flagv
                 else:
                     print("invalid tag")
                     return None
 
+            else:
+                event.tags=""
+                event.tag_value=1
     
-                event.save()
+            
+            event.save()
 
             return event
             
