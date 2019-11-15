@@ -104,7 +104,7 @@ def updateEvent(data,eventid):
             return None
 
 
-def fileterEventsByMachines(userid,startDate,endDate,machinelist,typelist,flagslist):
+def fileterEventsByMachines(userid,startDate,endDate,machinelist,typelist,flagslist, isFlagged):
     
     flagv= -1    
     myuserid=userid
@@ -114,6 +114,7 @@ def fileterEventsByMachines(userid,startDate,endDate,machinelist,typelist,flagsl
     print(machinelist)
     print(typelist)
     print(flagslist)
+    print(isFlagged)
 
     try:
         if typelist is None or len(typelist)  <1:
@@ -137,7 +138,26 @@ def fileterEventsByMachines(userid,startDate,endDate,machinelist,typelist,flagsl
 
         print("quering for "+userid+ " for types  "+str(typelist) + "for machines "+str(machinelist) )
 
-        if flagv > 0:
+        if flagv > 0 and isFlagged!=None and isFlagged:
+
+            print("the value of flag is "+str(flagv))
+            event = events.objects.all().annotate(
+                    delta=F('tag_value')%flagv).filter(userid = userid,
+                    type__in=typelist,
+                    machine_id__in=machinelist,
+                    isflagged=isFlagged,
+                    delta=0,
+                    date__range = (startDate, endDate)).order_by("-date")
+            
+        elif flagv <= 0 and isFlagged!=None and isFlagged:
+            print("the value of flag is "+str(flagv))
+            event = events.objects.filter(userid = userid,
+                        type__in=typelist,
+                        isflagged=isFlagged,
+                        date__range = (startDate, endDate),
+                        machine_id__in=machinelist).order_by("-date")
+
+        elif flagv > 0:
             print("the value of flag is "+str(flagv))
             event = events.objects.all().annotate(
                     delta=F('tag_value')%flagv).filter(userid = userid,
@@ -194,12 +214,12 @@ def validateEventTypeFalgLists(machinelist,typelist,flagslist):
             return None
 
 
-def getTheMonthlyEventsCountBasedOnType(evtype):
+def getTheMonthlyEventsCountBasedOnType(evtype,machineid):
 
     try:
         resultset = events.objects.raw('''Select 1 as eventid, Date(`date`) as event_date, count(eventid) as event_count from users_events
-        where type = 'ANIMAL_DETECTION' and  `date` > Date(DATE_SUB(now(),interval 1 MONTH)) 
-                                    group by Date(`date`)''')
+        where type = %s and machine_id_id = %s and `date` > Date(DATE_SUB(now(),interval 24 MONTH)) 
+                                    group by Date(`date`)''',[evtype,machineid])
         return resultset
 
     except:
