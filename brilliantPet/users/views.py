@@ -13,6 +13,8 @@ import time
 from .userFunctions import *
 from .eventFunctions import *
 from .machineFunctions import *
+from .timerFunctions import *
+
 from django.core import serializers
 import django.http
 
@@ -753,6 +755,7 @@ class FilterEvent(APIView):
         if mlist!= None:
             mlist=mlist.strip()
             mlist= list(mlist.split(",")) 
+            print("machine list is "+str(mlist))
 
         typelist=params.get("typelist")
         
@@ -870,6 +873,99 @@ class  GraphEventCount(APIView):
 
                 return gm.successResponse(retSet)
         
+
+class TimerSlotDetials(APIView):
+
+    def get(self, request):
+
+        params = gm.cleanData(request.query_params)
+        hasError = hasErrorAuthenticate(params)
+        if hasError:
+            return hasError
+
+        requiredParams = ["machine_id"]
+        emptyOrMissing = gm.getMissingEmptyParams(requiredParams, params)
+
+        if emptyOrMissing:
+            return emptyOrMissing
+
+        ev = fileterTimeslotsByMachines(params["machine_id"],params["userid"])
+
+        if ev is not None:
+            retSet=[]
+            for item in ev:
+                retSet.append({
+                "timerid" : item.timerId,
+                    "timeinsecond" : item.timeinseconds,
+                    "weeks" : item.weeklystring,
+                    "weeklyvalue" : item.weekly_value,
+                    "isactive":item.is_active,
+                    "isdeleted":item.is_deleted,
+            })
+            return gm.successResponse(retSet)
+
+
+    """ Takes teh create_flag boolean parameter which invokes the creation of timer if it is true
+    and if it is false, it will update the existing timer with timerid attribiute """
+
+    def post(self, request):
+
+        data = gm.cleanData(request.data)
+
+        hasError = hasErrorAuthenticate(data)
+        if hasError:
+            return hasError
+
+
+        requiredParams = ["userid","weeks","activity_flag","seconds","machine_id","create_flag"]
+        missingParams = gm.missingParams(requiredParams, data)
+
+        if missingParams:
+            missingParams = ", ".join(missingParams)
+            return gm.clientError(missingParamMessage.format(missingParams))
+        
+        try:
+            weeks= None if "weeks" not in data else data["weeks"]
+            timeinseconds= None if "seconds" not in data else data["seconds"]
+            isActive= None if "activity_flag" not in data else data["activity_flag"]
+            isCreateFlag= None if "create_flag" not in data else data["create_flag"]
+            timeinseconds= None if "seconds" not in data else data["seconds"]
+            timerid= None if "timerid" not in data else data["timerid"]
+            delete_flag= None if "delete_flag" not in data else data["delete_flag"]
+
+           
+
+            
+            if int(isCreateFlag):
+                item = createTimerForMachine(weeks,timeinseconds,isActive,data["machine_id"])
+            else:
+                
+                if timerid is None:
+                    return gm.clientError("timerid missing in post data.")
+                
+                item=updateTimerForMachine(weeks,timeinseconds,isActive,data["machine_id"],timerid,delete_flag)
+        
+            retSet=[]
+            if item:
+                    retSet.append({
+                        "timerid" : item.timerId,
+                        "timeinsecond" : item.timeinseconds,
+                        "weeks" : item.weeklystring,
+                        "weeklyvalue" : item.weekly_value,
+                        "isactive":item.is_active,
+                        "isdeleted":item.is_deleted,
+                        })
+
+                    return gm.successResponse(retSet)
+            else:
+                return gm.errorResponse("something went wrong")
+
+        except:
+            traceback.print_exc()
+            gm.errorLog(traceback.format_exc())
+            return gm.errorResponse("There was some error while making changes. Try again later.")
+
+
 
 
 

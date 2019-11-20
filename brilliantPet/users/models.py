@@ -49,6 +49,7 @@ class User(models.Model):
 class Pets(models.Model):
 
     petid = models.AutoField(primary_key=True)
+    
 
     userid = models.ForeignKey(User, on_delete=models.CASCADE, null = False, blank=False)
     name = models.CharField(max_length=45, null = False, blank = False)
@@ -59,6 +60,15 @@ class Pets(models.Model):
     weight_unit = models.CharField(max_length=45, null = False)
     is_deleted = models.IntegerField(null = False, blank=False, default=0)
 
+
+class TimerSlot(models.Model):
+    timerId = models.AutoField(primary_key=True)
+    machine_id = models.ForeignKey('MachineDetails', models.DO_NOTHING, db_column='machine_id', blank=False, null=False)
+    weeklystring = models.CharField(max_length=45, null = False, blank = False)
+    weekly_value= models.IntegerField(default=1, blank=True, null=True)
+    is_deleted = models.IntegerField(null = False, blank=False, default=0)
+    is_active = models.IntegerField(null = False, blank=False, default=0)
+    timeinseconds= models.IntegerField(default=1, blank=True, null=True)
 
 
 
