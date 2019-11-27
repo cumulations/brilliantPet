@@ -12,7 +12,20 @@ urlpatterns = [
     url(r"^login$", userLogin.as_view()),
     url(r"^logout$", userLogout.as_view()),
     url(r"^tokenupdate$", notificationUpdate.as_view()),
-    url(r"^events$", Event.as_view())
+    url(r"^events$", Event.as_view()),
+    url(r"^lastevent$", LastEventOfTheMachine.as_view()),
+    url(r"^filterevent$", FilterEvent.as_view()),
+    url(r"^monthyevent$", GraphEventCount.as_view()),
+    url(r"^mqttevent$", MqttEvent.as_view()),
+    url(r"^timerevents$", TimerSlotDetials.as_view())
+
+    
+
+
+    
+
+
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -108,11 +108,18 @@ class generalClass:
 
         cleanedData = {}
         for param in data:
+            added = False
             if type(data[param]) == str:
+                added = True
                 cleanedData[param] = data[param].strip()
 
             if param == "email":
+                added = True
                 cleanedData[param] = data[param].lower()
+
+            if not added:
+                cleanedData[param] = data[param]
+
 
         return cleanedData
 
@@ -204,7 +211,7 @@ class generalClass:
     def getUniqueFileName(self, ext = ""):
 
         ct = int(time.time() * 10000)
-        randomString = self.randomStringGenerator(6)
+        randomString = self.randomStringGenerator(6, usePunctuation=False)
         fileName = "{}{}{}".format(randomString, ct, ext)
 
         return fileName
@@ -236,21 +243,24 @@ class generalClass:
 
 
     def printEverythingOfObject(self, obj):
+        strng = ""
         for x in dir(obj):
             try:
                 atr = getattr(obj, x)
                 if type(atr) == types.FunctionType:
                     try:
-                        pp.pprint("result from method {} is {}".format(x, atr()))
+                        strng += "result from method {} is {}\n".format(x, atr())
                     except Exception as e:
-                        pp.pprint("exception for method {} is {}".format(x, e))
+                        strng += "exception for method {} is {}\n".format(x, e)
                 else:
                     try:
-                        pp.pprint("result from attribute {} is {}".format(x, atr))
+                        strng += "result from attribute {} is {}\n".format(x, atr)
                     except Exception as e:
-                        pp.pprint("exception for attribute {} is {}".format(x, e))
+                        strng += "exception for attribute {} is {}\n".format(x, e)
             except Exception as e:
-                print(e)
+                strng += traceback.format_exc()
+
+        return strng
 
 
 

@@ -36,11 +36,11 @@ def securePassword(password):
 
 
 
-def register(data):
+def register(data, userSelected = None):
 
 
     cleanedData = gm.cleanData(data)
-    requiredParams = ["userid", "name", "notification_token", "rolls_count_at_home", "password", "email", "address", "profile_image"]
+    requiredParams = ["userid", "name", "notification_token", "shopify_access_token", "rolls_count_at_home", "password", "email", "address", "profile_image"]
 
     missingParams = gm.missingParams(requiredParams, cleanedData)
     if missingParams:
@@ -50,7 +50,7 @@ def register(data):
         raise ValidationError("Password len too short. Should be more than 6 characters.")
 
     password = securePassword(cleanedData["password"])
-    user = User()
+    user = userSelected if userSelected else User()
 
     if data["profile_image"] not in ["", None]:
         profile_image = data["profile_image"]
@@ -59,13 +59,14 @@ def register(data):
 
     user.userid = cleanedData["userid"]
     user.name = cleanedData["name"]
-    user.notification_token = cleanedData["notification_token"]
+    user.notificationToken = cleanedData["notification_token"]
     user.rolls_count_at_home = cleanedData["rolls_count_at_home"]
     user.password = password
     user.login_token = ""
     user.email = cleanedData["email"]
     user.address = cleanedData["address"]
     user.profile_image = profile_image
+    user.shopify_access_token = cleanedData["shopify_access_token"]
     user.isDeleted = 0
 
     user.save()
@@ -86,7 +87,7 @@ def login(data, user):
 
     if flag == 1 and user.password == password:
 
-        login_token = gm.randomStringGenerator()
+        login_token = gm.randomStringGenerator(26)
         user.login_token = login_token
         user.save()
         return login_token
@@ -95,7 +96,7 @@ def login(data, user):
 
 
 
-def authenticate(data):
+def hasErrorAuthenticate(data):
 
     data = gm.cleanData(data)
 
@@ -106,6 +107,8 @@ def authenticate(data):
     user = isUser(data)
     if not user:
         return gm.not_a_user()
+
+    return False     # Doesn't check for login_token. Remove this for login_token check implementation
 
     if user.login_token == data["login_token"]:
         return False
