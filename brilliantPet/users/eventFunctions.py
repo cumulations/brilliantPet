@@ -245,7 +245,7 @@ def getTheMonthlyEventsCountBasedOnType(evtype,machineid):
 
     try:
         resultset = events.objects.raw('''Select 1 as eventid, Date(`date`) as event_date, count(eventid) as event_count from users_events
-        where type = %s and machine_id_id = %s and `date` > Date(DATE_SUB(now(),interval 24 MONTH)) 
+        where type = %s and machine_id_id = %s and `date` > Date(DATE_SUB(now(),interval 1 MONTH)) 
                                     group by Date(`date`)''',[evtype,machineid])
         return resultset
 
